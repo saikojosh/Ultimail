@@ -1,0 +1,41 @@
+{
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/saikojosh/Ultimail.git"
+  },
+  "bugs": {
+    "url": "https://github.com/saikojosh/Ultimail/issues"
+  },
+  "name": "ultimail",
+  "version": "0.0.1",
+  "description": "The ultimate emailer module for Node.js.",
+  "keywords": [
+    "email",
+    "emailer",
+    "postmark",
+    "template",
+    "templating",
+    "html"
+  ],
+  "main": "ultimail.js",
+  "author": "Josh Cole <saikojosh@gmail.com> (http://www.JoshuaCole.me)",
+  "contributors": [
+    {
+      "name": "Josh Cole",
+      "email": "saikojosh@gmail.com"
+    }
+  ],
+  "dependencies": {
+    "async": "0.9.x",
+    "juice2": "1.3.x",
+    "handlebars": "2.0.x",
+    "marked": "0.3.x",
+    "object-assign": "2.0.x",
+    "postmark": "0.2.x",
+    "underscore": "1.7.x"
+  },
+  "license": "MIT"
+}
