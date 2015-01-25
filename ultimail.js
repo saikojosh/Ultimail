@@ -277,11 +277,32 @@ Ultimail.prototype.Email = function (options) {
     attachments: options.attachments || []
   };
 
-  // Add a method for sending email later.
-  // callback(err, success);
   var instance = this;
-  email.send = function (options, callback) {
+
+  /*
+   * A method for sending emails later.
+   * callback(err, success);
+   * [Usage]
+   *  [1] email.send(options, callback);
+   *  [2] email.send(callback);
+   */
+  email.send = function (p1, p2) {
+
+    var options, callback;
+
+    // [1] email.send(options, callback);
+    if (_.isFunction(p2)) {
+      options  = p1;
+      callback = p2;
+    }
+    // [2] email.send(callback);
+    else {
+      options  = null;
+      callback = p1;
+    }
+
     instance.send(email, options, callback);
+
   };
 
   return email;
