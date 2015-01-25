@@ -119,7 +119,7 @@ mailer.send('/path/to/template/directory/', {
 mailer.send(templateDirectory, options, callback);
 ```
 
-- **"templateDirectory"** - The path to the directory where the template files are stored.
+- **"templateDirectory"** OR **"email"** - The path to the directory where the template files are stored OR an email object.
 - **"options"** - A hash of options to send the email with.
 - **"callback"** - The function to call when we're finished, with the following parameters:
   - **"err"** - Either an error object or `Null`.
@@ -193,7 +193,7 @@ mailer.prepare(templateDirectory, options, callback);
   - **"email"** - The prepared email object.
 
 #### Send with `mailer.sendEmail()`
-If you need to change the provider before sending use this method and pass the `provider` option to `mailer.send()`. See Constructor Options for more information on the provider.
+You can change the provider for this one email by passing the `provider` option to `mailer.send()`. See Constructor Options for more information on the provider.
 ```javascript
 mailer.prepare('/path/to/template/directory/', {
   to:   'my-user@email.com'
@@ -217,6 +217,7 @@ mailer.prepare('/path/to/template/directory/', {
 ```
 
 #### Send with `email.send()`
+You can change the provider for this one email by passing the `provider` option to `email.send()`. See Constructor Options for more information on the provider.
 ```javascript
 mailer.prepare('/path/to/template/directory/', {
   to:   'my-user@email.com'
@@ -237,4 +238,10 @@ mailer.prepare('/path/to/template/directory/', {
   });
 
 });
+```
+
+**`email.send()` Parameters**
+```javascript
+email.send(options, callback);
+email.send(callback);
 ```
