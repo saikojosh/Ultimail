@@ -39,6 +39,7 @@ function Ultimail (options) {
  *  [2] send(email, options, callback);
  */
 Ultimail.prototype.send = function (input, options, callback) {
+  if (!_.isFunction(callback)) { callback = this.emptyFn; }
 
   options = objectAssign({
     provider: null
@@ -73,6 +74,7 @@ Ultimail.prototype.send = function (input, options, callback) {
  * on the email.
  */
 Ultimail.prototype.quickSend = function (options, callback) {
+  if (!_.isFunction(callback)) { callback = this.emptyFn; }
 
   options = objectAssign({
     to:          null,
@@ -100,6 +102,7 @@ Ultimail.prototype.quickSend = function (options, callback) {
  * callback(err, email);
  */
 Ultimail.prototype.prepare = function (tpl, options, callback) {
+  if (!_.isFunction(callback)) { callback = this.emptyFn; }
 
   options = objectAssign({
     to:          null,
@@ -301,6 +304,10 @@ Ultimail.prototype.Email = function (options) {
       callback = p1;
     }
 
+    // Ensure callback is defined.
+    if (!_.isFunction(callback)) { callback = this.emptyFn; }
+
+    // Send the email.
     instance.send(email, options, callback);
 
   };
@@ -375,6 +382,11 @@ Ultimail.prototype.isEmail = function (input) {
   return true;
 
 };
+
+/*
+ * An empty function for to use if callbacks aren't specified.
+ */
+Ultimail.prototype.emptyFn = function () {};
 
 /*
  * Export the constructor.
