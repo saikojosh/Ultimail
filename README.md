@@ -3,6 +3,9 @@ The ultimate emailer module for Node.js. Ultimail sends templated emails using a
 
 ## Notes
 
+#### Working Examples
+A few working examples can be found in the `/examples` directory.
+
 #### Email Providers
 Ultimail ships with support for a number of email providers. You will need to ensure you have the appropriate permissions/accounts setup to use them.
 
@@ -13,6 +16,36 @@ Email limits are set by the email provider you use, this includes number of reci
 
 #### View Engine
 At present Ultimail uses [Handlebars](http://handlebarsjs.com/) as its view engine. There may be scope to implement other view engines at a later date. For the time being if you want to use another view engine you can use the `quickSend()` method detailed below.
+
+## Email Templates
+Ultimail uses templates for sending email. Each template typically has 4 files:
+
+- **body.html** - The HTML body of the email. Will be processed by the view engine.
+- **body.txt** - The plain text body of the email. Will be processed by the view engine.
+- **styles.css** - CSS for the HTML body. You can name this anything you want, and has as many external files as you want.
+- **subject.txt** - The subject. Will be processed by the view engine.
+
+#### Directory Structure
+```javascript
+/emailTemplates
+  /passwordReset
+    /body.html
+    /body.txt
+    /styles.css
+    /subject.txt
+  /welcome
+    /body.html
+    /body.txt
+    /styles.css
+    /subject.txt
+```
+
+#### External CSS
+You can include as many external CSS files in your HTML body as you want, using the standard `<link>` tag. For best results store all of your external CSS files in the template directory and avoid linking to remote CSS files.
+
+```html
+<link rel="stylesheet" type="text/css" href="styles.css">
+```
 
 ## Initialise Ultimail
 Create a new mailer instance with some global options. The mailer can then be used to send multiple different emails.
@@ -160,6 +193,7 @@ mailer.prepare(templateDirectory, options, callback);
   - **"email"** - The prepared email object.
 
 #### Send with `mailer.sendEmail()`
+If you need to change the provider before sending use this method and pass the `provider` option to `mailer.send()`. See Constructor Options for more information on the provider.
 ```javascript
 mailer.prepare('/path/to/template/directory/', {
   to:   'my-user@email.com'
