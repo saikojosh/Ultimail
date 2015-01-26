@@ -6,7 +6,6 @@ var fs           = require('fs');
 var async        = require('async');
 var juice2       = require('juice2');
 var handlebars   = require('handlebars');
-var marked       = require('marked');
 var objectAssign = require('object-assign');
 var _            = require('underscore');
 
@@ -18,7 +17,6 @@ function Ultimail (options) {
   // Default options.
   options = objectAssign({
     provider:  null,
-    markdown:  false,
     styles:    true,
     variables: null
   }, options);
@@ -113,7 +111,6 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
     subject:     null,
     attachments: null,
     variables:   null,
-    markdown:    null,
     styles:      null
   }, options);
 
@@ -122,7 +119,6 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
   var tplHtmlBody = tpl + '/body.html';
   var tplTextBody = tpl + '/body.txt';
   var variables   = objectAssign({}, this.options.variables, options.variables);
-  var markdown    = (options.styles !== null ? objectAssign({}, this.options.markdown, options.markdown) : this.options.markdown);
   var styles      = (options.styles !== null ? options.styles : this.options.styles);
 
   // Setup email.
@@ -188,45 +184,6 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
 
         // Save and continue.
         email.textBody = output;
-        return next(null);
-
-      });
-
-    },
-
-    // Process markdown on the HTML body.
-    function markdownHtmlBody (next) {
-
-      // Skip if no HTML body.
-      if (!email.htmlBody) { return next(null); }
-
-      // Skip if we aren't processing markdown.
-      if (!markdown) { return next(null); }
-
-      // Default options (as per "marked" module).
-      var defaultOptions = {
-        gfm:         true,
-        tables:      true,
-        breaks:      false,
-        pedantic:    false,
-        sanitize:    true,
-        smartLists:  true,
-        smartypants: false
-      };
-
-      // Merge default options with global and instance options.
-      var finalOptions = objectAssign({}, defaultOptions, markdown);
-
-      // Set markdown options.
-      marked.setOptions(finalOptions);
-
-      // Parse markdown.
-      marked(email.htmlBody, function (err, output) {
-
-        if (err) { return next(err); }
-
-        // Save and continue.
-        email.htmlBody = output;
         return next(null);
 
       });
