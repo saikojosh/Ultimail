@@ -1,0 +1,4 @@
+Welcome {{firstName}} {{lastName}} ({{email.to.[0]}}) to {{brandName}}! We're excited to see you join.
+
+This is a second line.
+Hello world hello world hello world hello world hello world hello world hello world.
