@@ -90,7 +90,7 @@ Ultimail.prototype.quickSend = function (options, callback) {
   }, options);
 
   // Setup email.
-  var email = new this.Email(options);
+  var email = this.createEmail(options);
 
   // Send the email!
   return this.send(email, options, callback);
@@ -126,7 +126,7 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
   var styles      = (options.styles !== null ? options.styles : this.options.styles);
 
   // Setup email.
-  var email = new this.Email(options);
+  var email = this.createEmail(options);
 
   // Start preparing the email.
   async.waterfall([
@@ -258,10 +258,8 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
 
 /*
  * Returns a new email object.
- * [Usage]
- *  new this.Email({ ... });
  */
-Ultimail.prototype.Email = function (options) {
+Ultimail.prototype.createEmail = function (options) {
 
   // Default to Null if no values are set.
   var to  = options.to  || null;
