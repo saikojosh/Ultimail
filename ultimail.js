@@ -121,8 +121,8 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
   var tplHtmlBody = tpl + '/body.html';
   var tplTextBody = tpl + '/body.txt';
   var tplSubject  = tpl + '/subject.txt';
-  var markdown    = objectAssign({}, this.markdown, options.markdown);
   var styles      = (options.styles !== null ? options.styles : this.styles);
+  var markdown    = (options.styles !== null ? objectAssign({}, this.options.markdown, options.markdown) : this.options.markdown);
 
   // Setup email.
   var email = new this.Email(options);
