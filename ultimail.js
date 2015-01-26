@@ -118,9 +118,9 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
   }, options);
 
   var instance    = this;
+  var tplSubject  = tpl + '/subject.txt';
   var tplHtmlBody = tpl + '/body.html';
   var tplTextBody = tpl + '/body.txt';
-  var tplSubject  = tpl + '/subject.txt';
   var variables   = objectAssign({}, this.options.variables, options.variables);
   var markdown    = (options.styles !== null ? objectAssign({}, this.options.markdown, options.markdown) : this.options.markdown);
   var styles      = (options.styles !== null ? options.styles : this.options.styles);
@@ -130,6 +130,27 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
 
   // Start preparing the email.
   async.waterfall([
+
+    // Load the subject and process the template.
+    function prepareSubject (next) {
+
+      // Don't bother loading the template if we are overriding the subject.
+      if (options.subject) {
+        email.subject = options.subject;
+        return next(null);
+      }
+
+      instance.prepareTemplate(tplSubject, variables, function (err, output) {
+
+        if (err) { return next(err); }
+
+        // Save and continue.
+        email.subject = output;
+        return next(null);
+
+      });
+
+    },
 
     // Load the HTML body and process the template.
     function prepareHtmlBody (next) {
@@ -161,27 +182,6 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
 
     },
 
-    // Load the subject and process the template.
-    function prepareSubject (next) {
-
-      // Don't bother loading the template if we are overriding the subject.
-      if (options.subject) {
-        email.subject = options.subject;
-        return next(null);
-      }
-
-      instance.prepareTemplate(tplSubject, variables, function (err, output) {
-
-        if (err) { return next(err); }
-
-        // Save and continue.
-        email.subject = output;
-        return next(null);
-
-      });
-
-    },
-
     // Process markdown on the HTML body.
     function markdownHtmlBody (next) {
 
@@ -190,6 +190,8 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
 
       // Skip if we aren't processing markdown.
       if (!markdown) { return next(null); }
+
+      console.log('Running Markdown Parser');
 
       // Default options (as per "marked" module).
       var defaultOptions = {
@@ -229,6 +231,8 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
 
       // Styles have been disabled.
       if (!styles) { return next(null); }
+
+      console.log('jucing', 'file://' + tpl);
 
       // Inline the CSS styles.
       juice2.juiceContent(email.htmlBody, {
@@ -276,9 +280,9 @@ Ultimail.prototype.Email = function (options) {
     bcc:         bcc,
     from:        options.from || null,
     replyTo:     options.replyTo || null,
+    subject:     '',
     htmlBody:    '',
     textBody:    '',
-    subject:     '',
     attachments: options.attachments || []
   };
 
@@ -375,9 +379,9 @@ Ultimail.prototype.isEmail = function (input) {
   if (_.isUndefined(input.bcc))         { return false; }
   if (_.isUndefined(input.from))        { return false; }
   if (_.isUndefined(input.replyTo))     { return false; }
+  if (_.isUndefined(input.subject))     { return false; }
   if (_.isUndefined(input.htmlBody))    { return false; }
   if (_.isUndefined(input.textBody))    { return false; }
-  if (_.isUndefined(input.subject))     { return false; }
   if (_.isUndefined(input.attachments)) { return false; }
 
   // Success! The input is an email.
