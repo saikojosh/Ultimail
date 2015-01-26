@@ -10,7 +10,7 @@
     "url": "https://github.com/saikojosh/Ultimail/issues"
   },
   "name": "ultimail",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "The ultimate emailer module for Node.js.",
   "keywords": [
     "email",
