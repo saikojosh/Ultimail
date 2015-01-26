@@ -128,6 +128,16 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
   // Setup email.
   var email = this.createEmail(options);
 
+  // Add some additional variables to use when parsing templates.
+  variables.email = {
+    to:      email.to,
+    cc:      email.cc,
+    bcc:     email.bcc,
+    from:    email.from,
+    replyTo: email.replyTo,
+    subject: ''  //update the subject after parsing it.
+  };
+
   // Start preparing the email.
   async.waterfall([
 
@@ -136,7 +146,8 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
 
       // Don't bother loading the template if we are overriding the subject.
       if (options.subject) {
-        email.subject = options.subject;
+        email.subject           = options.subject;
+        variables.email.subject = options.subject;
         return next(null);
       }
 
@@ -145,7 +156,8 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
         if (err) { return next(err); }
 
         // Save and continue.
-        email.subject = output;
+        email.subject           = output;
+        variables.email.subject = output;
         return next(null);
 
       });
