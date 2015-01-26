@@ -117,6 +117,7 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
     styles:      null
   }, options);
 
+  var instance    = this;
   var tplHtmlBody = tpl + '/body.html';
   var tplTextBody = tpl + '/body.txt';
   var tplSubject  = tpl + '/subject.txt';
@@ -132,7 +133,7 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
     // Load the HTML body and process the template.
     function prepareHtmlBody (next) {
 
-      ME.prepareTemplate(tplHtmlBody, options.variables, function (err, output) {
+      instance.prepareTemplate(tplHtmlBody, variables, function (err, output) {
 
         if (err) { return next(err); }
 
@@ -147,7 +148,7 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
     // Load the text body and process the template.
     function prepareTextBody (next) {
 
-      ME.prepareTemplate(tplTextBody, options.variables, function (err, output) {
+      instance.prepareTemplate(tplTextBody, variables, function (err, output) {
 
         if (err) { return next(err); }
 
@@ -168,7 +169,7 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
         return next(null);
       }
 
-      ME.prepareTemplate(tplSubject, options.variables, function (err, output) {
+      instance.prepareTemplate(tplSubject, variables, function (err, output) {
 
         if (err) { return next(err); }
 
