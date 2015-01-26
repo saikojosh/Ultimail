@@ -47,6 +47,8 @@ You can include as many external CSS files in your HTML body as you want, using 
 <link rel="stylesheet" type="text/css" href="styles.css">
 ```
 
+For these CSS includes to work you must specify the `templateDirectory` parameter as an absolute path when using `mailer.send()` and `mailer.prepare()`.
+
 ## Initialise Ultimail
 Create a new mailer instance with some global options. The mailer can then be used to send multiple different emails.
 
@@ -119,7 +121,7 @@ mailer.send('/path/to/template/directory/', {
 mailer.send(templateDirectory, options, callback);
 ```
 
-- **"templateDirectory"** OR **"email"** - The path to the directory where the template files are stored OR an email object.
+- **"templateDirectory"** OR **"email"** - The path to the directory where the template files are stored (this **must** be an absolute path) OR an email object.
 - **"options"** - A hash of options to send the email with.
 - **"callback"** - The function to call when we're finished, with the following parameters:
   - **"err"** - Either an error object or `Null`.
@@ -186,7 +188,7 @@ You can prepare an email for sending later by using the `mailer.prepare()` metho
 mailer.prepare(templateDirectory, options, callback);
 ```
 
-- **"templateDirectory"** - The path to the directory where the template files are stored.
+- **"templateDirectory"** - The path to the directory where the template files are stored (this **must** be an absolute path).
 - **"options"** - A hash of options to send the email with.
 - **"callback"** - The function to call when we're finished, with the following parameters:
   - **"err"** - Either an error object or `Null`.
