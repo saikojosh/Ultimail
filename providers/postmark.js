@@ -36,9 +36,9 @@ PostmarkProvider.prototype.send = function (email, callback) {
 
     // Send the email.
     postmark.send({
-      "To":          email.to.join(','),
-      "Cc":          email.cc.join(','),
-      "Bcc":         email.bcc.join(','),
+      "To":          (email.to  ? email.to.join(',')  : null),
+      "Cc":          (email.cc  ? email.cc.join(',')  : null),
+      "Bcc":         (email.bcc ? email.bcc.join(',') : null),
       "From":        email.from,
       "ReplyTo":     email.replyTo,
       "Subject":     email.subject,
