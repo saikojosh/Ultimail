@@ -203,8 +203,6 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
       // Skip if we aren't processing markdown.
       if (!markdown) { return next(null); }
 
-      console.log('Running Markdown Parser');
-
       // Default options (as per "marked" module).
       var defaultOptions = {
         gfm:         true,
@@ -243,8 +241,6 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
 
       // Styles have been disabled.
       if (!styles) { return next(null); }
-
-      console.log('jucing', 'file://' + tpl);
 
       // Inline the CSS styles.
       juice2.juiceContent(email.htmlBody, {
