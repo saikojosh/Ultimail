@@ -48,7 +48,7 @@ Ultimail.prototype.send = function (input, options, callback) {
   var provider;
 
   // Are we overriding the provider?
-  if (options.provider && options.provider.name !== this.provider.name) {
+  if (options.provider) {
     provider = this.loadProvider(options.provider);
   } else {
     provider = this.provider;
