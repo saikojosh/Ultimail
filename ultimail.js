@@ -350,12 +350,12 @@ Ultimail.prototype.prepareTemplate = function (tplName, variables, callback) {
 Ultimail.prototype.loadProvider = function (options) {
 
   var name     = (_.isObject(options) ? options.name : options);
-  var provider = (name ? require('providers/' + name + '.js') : null);
+  var Provider = (name ? require('./providers/' + name + '.js') : null);
 
   // Setup the provider.
-  if (provider) { provider.init(options); }
+  if (Provider) { return new Provider(options); }
 
-  return provider;
+  return null;
 
 };
 
