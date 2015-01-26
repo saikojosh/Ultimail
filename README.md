@@ -168,7 +168,7 @@ mailer.quickSend(options, callback);
 ## Prepare an Email (but don't send)
 You can prepare an email for sending later by using the `mailer.prepare()` method. The options are the same as `mailer.send()`, except the `provider` option can't be specified. When you're ready to send the email, simply call `mailer.send()` with the email or `email.send()`.
 
-## Prepare Parameters
+#### Prepare Parameters
 ```javascript
 mailer.prepare(templateDirectory, options, callback);
 ```
