@@ -230,14 +230,14 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
       if (!styles) { return next(null); }
 
       // Inline the CSS styles.
-      juice2.juiceContent(email.bodyHtml, {
+      juice2.juiceContent(email.htmlBody, {
         url: 'file://' + tpl
       }, function(err, output) {
 
         if (err) { return next(err); }
 
         // Save and continue.
-        email.bodyHtml = output;
+        email.htmlBody = output;
         return next(null);
 
       });
