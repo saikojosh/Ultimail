@@ -1,5 +1,5 @@
 # Ultimail
-The ultimate emailer module for Node.js. Ultimail sends templated emails using a given provider. Templates are written using ordinary HTML and CSS, which is combined and parsed by a view engine prior to sending. This allows an email to be written once, and then customised with if statements and variables.
+Ultimail sends templated emails using a given provider. Templates are written using ordinary HTML and CSS, which is combined and parsed by a view engine prior to sending. This allows an email to be written once, and then customised with if statements and variables.
 
 ## Notes
 
