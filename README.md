@@ -60,7 +60,6 @@ var mailer = new Ultimail({
     name:   'postmark',
     apiKey: 'ABC-123-XYZ'
   },
-  markdown:  false,
   styles:    true,
   variables: {
     brandName: 'Amazing Widgets Ltd',
@@ -79,24 +78,8 @@ new Ultimail(options);
 #### Constructor Options
 - **"provider"**  - A hash containing properties required to setup the email provider OR a string of provider name.
   - **"name"**      - The name of the provider e.g. `postmark`. Required if `provider` is a hash.
-- **"markdown"**  - Set `true` or a hash of options to parse markdown in the HTML body. Default `false`.
 - **"styles"**    - Set `true` to inline the template's external CSS styles into the HTML body. Default `true`.
 - **"variables"** - A hash of variables to use with the view engine.
-
-#### Markdown Options
-See [Marked](https://www.npmjs.com/package/marked) for explanations of the options that can be used to configure the markdown parser. By default the following options will be used:
-
-```javascript
-markdown: {
-  gfm:         true,
-  tables:      true,
-  breaks:      false,
-  pedantic:    false,
-  sanitize:    true,
-  smartLists:  true,
-  smartypants: false
-}
-```
 
 ## Sending an Email
 To send an email you use the `mailer.send()` method and specify the path to the directory where the template is stored, a hash of options and a callback.
@@ -136,7 +119,6 @@ mailer.send(templateDirectory, options, callback);
 - **"subject"**     - Override the template subject with a new one.
 - **"attachments"** - An array of attachment objects.
 - **"variables"**   - A hash of variables to use with the view engine. Individual variables can overwrite those in the global `variables` option.
-- **"markdown"**    - Override the global `markdown` option with `true`, `false` or a hash of markdown options.
 - **"styles"**      - Override the global `styles` option with `true` or `false`.
 - **"provider"**    - Override the global `provider`. See Constructor Options.
 
