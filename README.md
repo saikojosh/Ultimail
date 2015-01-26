@@ -11,6 +11,7 @@ Ultimail ships with support for a number of email providers. You will need to en
 
 1. Postmark (www.postmarkapp.com)
 
+
 #### Email Limits
 Email limits are set by the email provider you use, this includes number of recipients, email addresses you can send from and attachment limits.
 
