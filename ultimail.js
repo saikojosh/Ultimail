@@ -330,7 +330,7 @@ Ultimail.prototype.prepareTemplate = function (tplName, variables, callback) {
 
     // Compile the handlebars template.
     try {
-      var hbTpl  = handlebars.compile(data);
+      var hbTpl  = handlebars.compile(data.toString());
       var output = hbTpl(variables);
     }
     catch (err) {
