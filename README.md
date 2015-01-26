@@ -147,9 +147,9 @@ Send an email without any pre-processing by using `mailer.quickSend()`.
 mailer.quickSend({
   to:       'my-user@email.com'
   from:     'hello@my-website.com',
+  subject:  'Welcome',
   htmlBody: '<h1>Hello</h1>',
-  textBody: 'Hello',
-  subject:  'Welcome'
+  textBody: 'Hello'
 }, function (err, success) {
 
   // Do something else...
