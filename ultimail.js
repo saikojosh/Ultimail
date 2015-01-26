@@ -276,11 +276,11 @@ Ultimail.prototype.createEmail = function (options) {
     to:          to,
     cc:          cc,
     bcc:         bcc,
-    from:        options.from || null,
-    replyTo:     options.replyTo || null,
-    subject:     '',
-    htmlBody:    '',
-    textBody:    '',
+    from:        options.from        || null,
+    replyTo:     options.replyTo     || null,
+    subject:     options.subject     || null,
+    htmlBody:    options.htmlBody    || null,
+    textBody:    options.textBody    || null,
     attachments: options.attachments || []
   };
 
