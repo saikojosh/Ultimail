@@ -81,6 +81,8 @@ new Ultimail(options);
   - **"name"**      - The name of the provider e.g. `postmark`. Required if `provider` is a hash.
 - **"styles"**    - Set `true` to inline the template's external CSS styles into the HTML body. Default `true`.
 - **"variables"** - A hash of variables to use with the view engine.
+- **"from"**      - Set a global 'from' address to use for this mailer (optional).
+- **"replyTo"**   - Set a global 'replyTo' address to use for this mailer (optional).
 
 ## Sending an Email
 To send an email you use the `mailer.send()` method and specify the path to the directory where the template is stored, a hash of options and a callback.
