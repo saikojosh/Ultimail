@@ -18,7 +18,9 @@ function Ultimail (options) {
   options = objectAssign({
     provider:  null,
     styles:    true,
-    variables: null
+    variables: null,
+    from:      null,
+    replyTo:   null
   }, options);
 
   // Save the options.
@@ -78,8 +80,8 @@ Ultimail.prototype.quickSend = function (options, callback) {
     to:          null,
     cc:          null,
     bcc:         null,
-    from:        null,
-    replyTo:     null,
+    from:        this.from,
+    replyTo:     this.replyTo,
     subject:     null,
     htmlBody:    null,
     textBody:    null,
@@ -106,8 +108,8 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
     to:          null,
     cc:          null,
     bcc:         null,
-    from:        null,
-    replyTo:     null,
+    from:        this.from,
+    replyTo:     this.replyTo,
     subject:     null,
     attachments: null,
     variables:   null,
