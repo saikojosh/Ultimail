@@ -10,7 +10,6 @@ var mailer = new Ultimail({
     name:   'postmark',
     apiKey: '0a1d6715-33f7-4dda-b3a2-892115138935'
   },
-  styles: true,
   variables: {
     brandName: 'Amazing Widgets Ltd',
     website:   'http://www.aw-ltd.co.uk'
