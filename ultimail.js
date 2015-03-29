@@ -6,7 +6,7 @@ var fs           = require('fs');
 var async        = require('async');
 var juice2       = require('juice2');
 var handlebars   = require('handlebars');
-var objectAssign = require('object-assign');
+var extender     = require('object-extender');
 var _            = require('underscore');
 
 /*
@@ -15,7 +15,7 @@ var _            = require('underscore');
 function Ultimail (options) {
 
   // Default options.
-  options = objectAssign({
+  options = extender.defaults({
     provider:  null,
     styles:    true,
     variables: null,
@@ -41,7 +41,7 @@ function Ultimail (options) {
 Ultimail.prototype.send = function (input, options, callback) {
   if (!_.isFunction(callback)) { callback = this.emptyFn; }
 
-  options = objectAssign({
+  options = extender.defaults({
     provider: null
   }, options);
 
@@ -76,7 +76,7 @@ Ultimail.prototype.send = function (input, options, callback) {
 Ultimail.prototype.quickSend = function (options, callback) {
   if (!_.isFunction(callback)) { callback = this.emptyFn; }
 
-  options = objectAssign({
+  options = extender.defaults({
     to:          null,
     cc:          null,
     bcc:         null,
@@ -104,7 +104,7 @@ Ultimail.prototype.quickSend = function (options, callback) {
 Ultimail.prototype.prepare = function (tpl, options, callback) {
   if (!_.isFunction(callback)) { callback = this.emptyFn; }
 
-  options = objectAssign({
+  options = extender.defaults({
     to:          null,
     cc:          null,
     bcc:         null,
@@ -120,7 +120,7 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
   var tplSubject  = tpl + '/subject.txt';
   var tplHtmlBody = tpl + '/body.html';
   var tplTextBody = tpl + '/body.txt';
-  var variables   = objectAssign({}, this.options.variables, options.variables);
+  var variables   = extender.extend({}, this.options.variables, options.variables);
   var styles      = (options.styles !== null ? options.styles : this.options.styles);
 
   // Setup email.
