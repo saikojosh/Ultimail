@@ -2,17 +2,17 @@
  * Postmark provider.
  */
 
-var ME           = module.exports;
-var Postmark     = require('postmark');
-var objectAssign = require('object-assign');
-var _            = require('underscore');
+var ME       = module.exports;
+var Postmark = require('postmark');
+var extender = require('object-extender');
+var _        = require('underscore');
 
 /*
  * Constructor.
  */
 function PostmarkProvider (options) {
 
-  options = objectAssign({
+  options = extender.defaults({
     apiKey: null
   }, options);
 
