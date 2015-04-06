@@ -121,6 +121,9 @@ mailer.send(templateDirectory, options, callback);
 - **"replyTo"**     - An email address for the recipient to reply to.
 - **"subject"**     - Override the template subject with a new one.
 - **"attachments"** - An array of attachment objects.
+  - **"filename"** - The filename of the attachment.
+  - **"mimeType"** - The mime type of the attachment.
+  - **"data"** - The content of the file encoded as a base64 string.
 - **"variables"**   - A hash of variables to use with the view engine. Individual variables can overwrite those in the global `variables` option.
 - **"styles"**      - Override the global `styles` option with `true` or `false`.
 - **"provider"**    - Override the global `provider`. See Constructor Options.
@@ -161,6 +164,9 @@ mailer.quickSend(options, callback);
 - **"replyTo"**     - An email address for the recipient to reply to.
 - **"subject"**     - Override the template subject with a new one.
 - **"attachments"** - An array of attachment objects.
+  - **"filename"** - The filename of the attachment.
+  - **"mimeType"** - The mime type of the attachment.
+  - **"data"** - The content of the file encoded as a base64 string.
 - **"htmlBody"**    - The string to use as the HTML body.
 - **"textBody"**    - The string to use as the plain text body.
 - **"provider"**    - Override the global `provider`. See Constructor Options.
