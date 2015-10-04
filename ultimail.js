@@ -2,12 +2,12 @@
  * Ultimail.
  */
 
-var fs           = require('fs');
-var async        = require('async');
-var juice2       = require('juice2-node4');
-var handlebars   = require('handlebars');
-var extender     = require('object-extender');
-var _            = require('underscore');
+var fs         = require('fs');
+var async      = require('async');
+var handlebars = require('handlebars');
+var extender   = require('object-extender');
+var Styliner   = require('styliner');
+var _          = require('underscore');
 
 /*
  * Constructor.
@@ -193,7 +193,7 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
     },
 
     // Process styles on the HTML body.
-    function juiceHtmlBody (next) {
+    function prepareHTMLBody (next) {
 
       // Skip if no HTML body.
       if (!email.htmlBody) { return next(null); }
@@ -201,19 +201,25 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
       // Styles have been disabled.
       if (!styles) { return next(null); }
 
-      // Inline the CSS styles.
-      juice2.juiceContent(email.htmlBody, {
-        url: 'file://' + tpl
-      }, function(err, output) {
-
-        if (err) { return next(err); }
-
-        // Save and continue.
-        email.htmlBody = output;
-        return next(null);
-
+      var styliner = new Styliner(tpl, {
+        compact:    true,
+        fixYahooMQ: true
       });
 
+      // Inline the CSS styles.
+      styliner.processHTML(email.htmlBody)
+      .then(function(source) {
+
+        // Save and continue.
+        email.htmlBody = source;
+        return next(null);
+
+      })
+      .catch(function (err) {
+
+        return next(err);
+
+      });
     }
 
   ], function (err) {

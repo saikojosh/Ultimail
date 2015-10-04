@@ -27,10 +27,10 @@
   ],
   "dependencies": {
     "async": "0.9.x",
-    "juice2-node4": "1.4.x",
     "handlebars": "2.0.x",
     "object-extender": "1.2.x",
     "postmark": "0.2.x",
+    "styliner": "0.8.x",
     "underscore": "1.7.x"
   },
   "license": "MIT"
