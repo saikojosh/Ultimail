@@ -4,7 +4,7 @@
 
 var fs           = require('fs');
 var async        = require('async');
-var juice2       = require('juice2');
+var juice2       = require('juice2-node4');
 var handlebars   = require('handlebars');
 var extender     = require('object-extender');
 var _            = require('underscore');
