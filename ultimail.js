@@ -235,9 +235,13 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
 Ultimail.prototype.createEmail = function (options) {
 
   // Default to Null if no values are set.
-  var to  = options.to  || null;
-  var cc  = options.cc  || null;
-  var bcc = options.bcc || null;
+  var to              = options.to       || null;
+  var cc              = options.cc       || null;
+  var bcc             = options.bcc      || null;
+  var subject         = options.subject  || '';
+  var htmlBody        = options.htmlBody || '';
+  var textBody        = options.textBody || '';
+  var trailingLinesRE = /(?:\r\n?|\n?)+$/;
 
   // Typecast values to arrays.
   if (to  !== null) { to  = (_.isArray(to)  ? to  : [to]);  }
@@ -249,12 +253,12 @@ Ultimail.prototype.createEmail = function (options) {
     to:          to,
     cc:          cc,
     bcc:         bcc,
-    from:        options.from        || null,
-    replyTo:     options.replyTo     || null,
-    subject:     options.subject     || null,
-    htmlBody:    options.htmlBody    || null,
-    textBody:    options.textBody    || null,
-    attachments: options.attachments || []
+    from:        options.from                          || null,
+    replyTo:     options.replyTo                       || null,
+    subject:     subject.replace(trailingLinesRE, '')  || null,
+    htmlBody:    htmlBody.replace(trailingLinesRE, '') || null,
+    textBody:    textBody.replace(trailingLinesRE, '') || null,
+    attachments: options.attachments                   || []
   };
 
   var instance = this;
