@@ -2,7 +2,6 @@
  * Postmark provider.
  */
 
-var ME       = module.exports;
 var Postmark = require('postmark');
 var extender = require('object-extender');
 var _        = require('underscore');
@@ -16,8 +15,8 @@ function PostmarkProvider (options) {
     apiKey: null
   }, options);
 
-  // Initialise Postmark with the key.
-  this.postmark = new Postmark(options.apiKey);
+  // Initialise the provider with the key.
+  this.provider = new Postmark(options.apiKey);
 
 };
 
@@ -27,7 +26,7 @@ function PostmarkProvider (options) {
  */
 PostmarkProvider.prototype.send = function (email, callback) {
 
-  var postmark = this.postmark;
+  var that = this;
 
   // First convert the attachments to the correct format.
   this.prepareAttachments(email.attachments, function (err, attachments) {
@@ -35,7 +34,7 @@ PostmarkProvider.prototype.send = function (email, callback) {
     if (err) { return callback(err); }
 
     // Send the email.
-    postmark.send({
+    that.provider.send({
       "To":          (email.to  ? email.to.join(',')  : null),
       "Cc":          (email.cc  ? email.cc.join(',')  : null),
       "Bcc":         (email.bcc ? email.bcc.join(',') : null),
@@ -67,7 +66,7 @@ PostmarkProvider.prototype.prepareAttachments = function (input, callback) {
     return callback(null, attachments);
   }
 
-  // Convert attachments array to Postmark format.
+  // Convert attachments array to provider format.
   for (var i = 0, ilen = input.length ; i < ilen ; i++) {
     attachments.push({
       "Name":        input[i].filename,
