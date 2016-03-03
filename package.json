@@ -13,9 +13,12 @@
     "email",
     "emailer",
     "postmark",
+    "mandrill",
     "template",
     "templating",
-    "html"
+    "html",
+    "plain",
+    "text"
   ],
   "main": "ultimail.js",
   "author": "Josh Cole <saikojosh@gmail.com> (http://www.JoshuaCole.me)",
