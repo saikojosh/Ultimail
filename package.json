@@ -26,12 +26,13 @@
     }
   ],
   "dependencies": {
-    "async": "0.9.x",
+    "async": "1.5.x",
     "handlebars": "2.0.x",
+    "mandrill-api": "1.0.x",
     "object-extender": "1.2.x",
     "postmark": "0.2.x",
     "styliner": "0.8.x",
-    "underscore": "1.7.x"
+    "underscore": "1.8.x"
   },
   "license": "MIT"
 }
