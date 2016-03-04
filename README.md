@@ -19,7 +19,7 @@ These providers only provide basic support at present. If you need a particular 
 Email limits are set by the email provider you use, this includes number of recipients, email addresses you can send from and attachment limits.
 
 #### View Engine
-At present Ultimail uses [Handlebars](http://handlebarsjs.com/) as its view engine. There may be scope to implement other view engines at a later date. For the time being if you want to use another view engine you can use the `quickSend()` method detailed below.
+At present Ultimail uses [Handlebars](http://handlebarsjs.com/) as its view engine. There may be scope to implement other view engines at a later date. For the time being if you want to use another view engine you can use the `quickSend()` method detailed below and pass in the compiled HTML and text bodies.
 
 ## Email Templates
 Ultimail uses templates for sending email. Each template typically has 4 files:
@@ -82,6 +82,7 @@ new Ultimail(options);
 #### Constructor Options
 - **"provider"**  - A hash containing properties required to setup the email provider OR a string of provider name.
   - **"name"**      - The name of the provider e.g. `postmark`. Required if `provider` is a hash.
+  - **apiKey**      - Your own API key for the provider. Required if `provider` is a hash.
 - **"styles"**    - Set `true` to inline the template's external CSS styles into the HTML body. Default `true`.
 - **"variables"** - A hash of variables to use with the view engine.
 - **"from"**      - Set a global 'from' address to use for this mailer (optional).
@@ -228,9 +229,7 @@ mailer.prepare('/path/to/template/directory/', {
 
   // Send the email.
   email.send(null, function (err, success) {
-
     // Continue...
-
   });
 
 });
