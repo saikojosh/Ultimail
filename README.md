@@ -12,6 +12,7 @@ Ultimail ships with support for a number of email providers. You will need to en
 1. Postmark (www.postmarkapp.com)
 2. Mandrill (www.mandrill.com)
 
+
 These providers only provide basic support at present. If you need a particular provider or want to add additional functionality to an exiting provider please submit a pull request.
 
 
@@ -29,10 +30,10 @@ Ultimail uses templates for sending email. Each template typically has 4 files:
 - **styles.css** - CSS for the HTML body. You can name this anything you want, and has as many external files as you want.
 - **subject.txt** - The subject. Will be processed by the view engine.
 
-## Layouts (Parent) Templates
+### Layouts (Parent) Templates
 Ultimail also supports layout/parent templates which can be shared between all templates used with a given mailer instance. Each mailer can only have one layout template. These are great if you have a standard format for your HTML or text emails and you want to share that between several different email templates.
 
-In your layout templates you need to use the `{{template}}` variable to designate where the email template should be included.
+In your layout templates you need to use the `{{template}}` variable to designate where the email template should be included. `subject.txt` is not required for layouts.
 
 
 #### Directory Structure
