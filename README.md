@@ -108,7 +108,7 @@ To send an email you use the `mailer.send()` method and specify the path to the 
 
 ```javascript
 mailer.send('/path/to/template/directory/', {
-  to:   'my-user@email.com'
+  to:   'my-user@email.com',
   from: 'hello@my-website.com',
   variables: {
     firstName: 'Bob',
