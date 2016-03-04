@@ -3,6 +3,7 @@
  */
 
 var fs         = require('fs');
+var pathify    = require('path').join;
 var async      = require('async');
 var handlebars = require('handlebars');
 var extender   = require('object-extender');
@@ -117,9 +118,9 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
   }, options);
 
   var instance    = this;
-  var tplSubject  = tpl + '/subject.txt';
-  var tplHtmlBody = tpl + '/body.html';
-  var tplTextBody = tpl + '/body.txt';
+  var tplSubject  = pathify(tpl, 'subject.txt');
+  var tplHtmlBody = pathify(tpl, 'body.html');
+  var tplTextBody = pathify(tpl, 'body.txt');
   var variables   = extender.extend({}, this.options.variables, options.variables);
   var styles      = (options.styles !== null ? options.styles : this.options.styles);
 
