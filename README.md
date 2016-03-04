@@ -10,6 +10,9 @@ A few working examples can be found in the `/examples` directory.
 Ultimail ships with support for a number of email providers. You will need to ensure you have the appropriate permissions/accounts setup to use them.
 
 1. Postmark (www.postmarkapp.com)
+2. Mandrill (www.mandrill.com)
+
+These providers only provide basic support at present. If you need a particular provider or want to add additional functionality to an exiting provider please submit a pull request.
 
 
 #### Email Limits
