@@ -30,7 +30,7 @@
   ],
   "dependencies": {
     "async": "1.5.x",
-    "handlebars": "2.0.x",
+    "handlebars": "4.0.x",
     "mandrill-api": "1.0.x",
     "object-extender": "1.2.x",
     "postmark": "0.2.x",
