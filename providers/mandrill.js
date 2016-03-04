@@ -69,7 +69,6 @@ MandrillProvider.prototype.send = function (email, callback) {
         "html":       email.htmlBody,
         "text":       email.textBody,
         "subject":    email.subject,
-        "from_name":  "Hedley Settled",
         "from_email": email.from,
         "to":         to,
         "inline_css": false,  //we already do this in Ultimail, no need to duplicate work.
