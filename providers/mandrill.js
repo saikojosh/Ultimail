@@ -2,7 +2,7 @@
  * Mandrill provider.
  */
 
-var mandrill = require('postmark');
+var mandrill = require('mandrill-api/mandrill');
 var extender = require('object-extender');
 var _        = require('underscore');
 
