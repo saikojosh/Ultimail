@@ -21,7 +21,8 @@ function Ultimail (options) {
     styles:    true,
     variables: null,
     from:      null,
-    replyTo:   null
+    replyTo:   null,
+    useLayout: null
   }, options);
 
   // Save the options.
@@ -150,7 +151,7 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
         return next(null);
       }
 
-      instance.prepareTemplate(tplSubject, variables, function (err, output) {
+      instance.prepareTemplate(null, 'subject', tplSubject, variables, function (err, output) {
 
         if (err) { return next(err); }
 
@@ -163,38 +164,89 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
 
     },
 
-    // Load the HTML body and process the template.
-    function prepareHtmlBody (next) {
+    // Compile the parent template if we have one.
+    function loadLayout (next) {
 
-      instance.prepareTemplate(tplHtmlBody, variables, function (err, output) {
+      // Not using a parent template.
+      if (!instance.options.useLayout) { return next(null, null); }
+
+      var layout = {
+        dir:         instance.options.useLayout,
+        htmlBodyTpl: null,
+        textBodyTpl: null
+      };
+      var htmlBodyFile = pathify(layout.dir, 'body.html');
+      var textBodyFile = pathify(layout.dir, 'body.txt');
+
+      // Load in the HTML template.
+      fs.readFile(htmlBodyFile, function (err, data) {
+
+        // Ignore 'file doesn't exist' errors.
+        if (err && err.code !== 'ENOENT') { return next(err); }
+
+        // Compile the template.
+        try {
+          layout.htmlBodyTpl = (data ? handlebars.compile(data.toString()) : null);
+        }
+        catch (err) {
+          return next(err);
+        }
+
+        // Load in the text template.
+        fs.readFile(textBodyFile, function (err, data) {
+
+          // Ignore 'file doesn't exist' errors.
+          if (err && err.code !== 'ENOENT') { return next(err); }
+
+          // Compile the template.
+          try {
+            layout.textBodyTpl = (data ? handlebars.compile(data.toString()) : null);
+          }
+          catch (err) {
+            return next(err);
+          }
+
+          // Continue.
+          return next(null, layout);
+
+        });
+
+      });
+
+    },
+
+    // Load the HTML body and process the template.
+    function prepareHtmlBody (layout, next) {
+
+      instance.prepareTemplate(layout, 'html', tplHtmlBody, variables, function (err, output) {
 
         if (err) { return next(err); }
 
         // Save and continue.
         email.htmlBody = output;
-        return next(null);
+        return next(null, layout);
 
       });
 
     },
 
     // Load the text body and process the template.
-    function prepareTextBody (next) {
+    function prepareTextBody (layout, next) {
 
-      instance.prepareTemplate(tplTextBody, variables, function (err, output) {
+      instance.prepareTemplate(layout, 'text', tplTextBody, variables, function (err, output) {
 
         if (err) { return next(err); }
 
         // Save and continue.
         email.textBody = output;
-        return next(null);
+        return next(null, layout);
 
       });
 
     },
 
     // Process styles on the HTML body.
-    function prepareHTMLBody (next) {
+    function inlineHTMLStyles (layout, next) {
 
       // Skip if no HTML body.
       if (!email.htmlBody) { return next(null); }
@@ -202,25 +254,57 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
       // Styles have been disabled.
       if (!styles) { return next(null); }
 
-      var styliner = new Styliner(tpl, {
+      var stylinerOptions = {
         compact:    true,
         fixYahooMQ: true
+      };
+
+      // Inline the styles in stages.
+      async.waterfall([
+
+        function layoutStyles (nextStyle) {
+
+          var styliner = new Styliner(layout.dir, stylinerOptions);
+
+          // Inline the CSS styles.
+          styliner.processHTML(email.htmlBody)
+          .then(function(source) {
+
+            // Save and continue.
+            email.htmlBody = source;
+            return nextStyle(null);
+
+          })
+          .catch(function (err) {
+            return nextStyle(err);
+          });
+
+        },
+
+        function templateStyles (nextStyle) {
+
+          var styliner = new Styliner(tpl, stylinerOptions);
+
+          // Inline the CSS styles.
+          styliner.processHTML(email.htmlBody)
+          .then(function(source) {
+
+            // Save and continue.
+            email.htmlBody = source;
+            return nextStyle(null);
+
+          })
+          .catch(function (err) {
+            return nextStyle(err);
+          });
+
+        }
+
+      ], function (err) {
+        if (err) { return next(err); }
+        return next(err, email);
       });
 
-      // Inline the CSS styles.
-      styliner.processHTML(email.htmlBody)
-      .then(function(source) {
-
-        // Save and continue.
-        email.htmlBody = source;
-        return next(null);
-
-      })
-      .catch(function (err) {
-
-        return next(err);
-
-      });
     }
 
   ], function (err) {
@@ -302,7 +386,7 @@ Ultimail.prototype.createEmail = function (options) {
  * Load and parse the template.
  * callback(err, output);
  */
-Ultimail.prototype.prepareTemplate = function (tplName, variables, callback) {
+Ultimail.prototype.prepareTemplate = function (layout, tplType, tplName, variables, callback) {
 
   // Load the template.
   fs.readFile(tplName, function (err, data) {
@@ -312,15 +396,28 @@ Ultimail.prototype.prepareTemplate = function (tplName, variables, callback) {
 
     // Compile the handlebars template.
     try {
-      var hbTpl  = handlebars.compile(data.toString());
-      var output = hbTpl(variables);
+      var emailTpl    = handlebars.compile(data.toString());
+      var emailOutput = emailTpl(variables);
     }
     catch (err) {
       return callback(err);
     }
 
+    var finalOutput;
+
+    // Do we have a parent layout to use?
+    if (tplType === 'html' && layout.htmlBodyTpl) {
+      finalOutput = layout.htmlBodyTpl({ template: emailOutput });
+    }
+    else if (tplType === 'text' && layout.textBodyTpl) {
+      finalOutput = layout.textBodyTpl({ template: emailOutput });
+    }
+    else {
+      finalOutput = emailOutput;
+    }
+
     // Success!
-    return callback(null, output);
+    return callback(null, finalOutput);
 
   });
 
