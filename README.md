@@ -29,9 +29,21 @@ Ultimail uses templates for sending email. Each template typically has 4 files:
 - **styles.css** - CSS for the HTML body. You can name this anything you want, and has as many external files as you want.
 - **subject.txt** - The subject. Will be processed by the view engine.
 
+## Layouts (Parent) Templates
+Ultimail also supports layout/parent templates which can be shared between all templates used with a given mailer instance. Each mailer can only have one layout template. These are great if you have a standard format for your HTML or text emails and you want to share that between several different email templates.
+
+In your layout templates you need to use the `{{template}}` variable to designate where the email template should be included.
+
+
 #### Directory Structure
+All email templates should be contained within a base directory, with each template having it's own sub directory. You can also add a directory for each of your layout templates.
+
 ```javascript
 /emailTemplates
+  /layout
+    /body.html
+    /body.txt
+    /styles.css
   /passwordReset
     /body.html
     /body.txt
@@ -65,6 +77,7 @@ var mailer = new Ultimail({
     apiKey: 'ABC-123-XYZ'
   },
   styles:    true,
+  useLayout: '/path/to/layout/directory',
   variables: {
     brandName: 'Amazing Widgets Ltd',
     website:   'http://www.aw-ltd.co.uk'
@@ -84,6 +97,7 @@ new Ultimail(options);
   - **"name"**      - The name of the provider e.g. `postmark`. Required if `provider` is a hash.
   - **apiKey**      - Your own API key for the provider. Required if `provider` is a hash.
 - **"styles"**    - Set `true` to inline the template's external CSS styles into the HTML body. Default `true`.
+- **useLayout**   - Provide the path to a layout template directory if you want your email templates to share common formatting.
 - **"variables"** - A hash of variables to use with the view engine.
 - **"from"**      - Set a global 'from' address to use for this mailer (optional).
 - **"replyTo"**   - Set a global 'replyTo' address to use for this mailer (optional).
