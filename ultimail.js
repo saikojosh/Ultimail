@@ -255,8 +255,9 @@ Ultimail.prototype.prepare = function (tpl, options, callback) {
       if (!styles) { return next(null); }
 
       var stylinerOptions = {
-        compact:    true,
-        fixYahooMQ: true
+        compact: true,
+        fixYahooMQ: true,
+        keepInvalid: true,
       };
 
       // Inline the styles in stages.
