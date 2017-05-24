@@ -33,7 +33,7 @@ Ultimail uses templates for sending email. Each template typically has 4 files:
 ### Layouts (Parent) Templates
 Ultimail also supports layout/parent templates which can be shared between all templates used with a given mailer instance. Each mailer can only have one layout template. These are great if you have a standard format for your HTML or text emails and you want to share that between several different email templates.
 
-In your layout templates you need to use the `{{template}}` variable to designate where the email template should be included. `subject.txt` is not required for layouts.
+In your layout templates you need to use the `{{{template}}}` variable to designate where the email template should be included. `subject.txt` is not required for layouts.
 
 
 #### Directory Structure
