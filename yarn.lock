@@ -25,10 +25,6 @@ amdefine@>=0.0.4:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/amdefine/-/amdefine-1.0.1.tgz#4a5282ac164729e93619bcfd3ad151f817ce91f5"
 
-asap@^2.0.0:
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/asap/-/asap-2.0.5.tgz#522765b50c3510490e52d7dcfe085ef9ba96958f"
-
 async@0.1.x:
   version "0.1.22"
   resolved "https://registry.yarnpkg.com/async/-/async-0.1.22.tgz#0fc1aaa088a0e3ef0ebe2d8831bab0dcf8845061"
@@ -71,24 +67,11 @@ cliui@^2.1.0:
     right-align "^0.1.1"
     wordwrap "0.0.2"
 
-"collections@>=2.0.1 <3.0.0":
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/collections/-/collections-2.0.3.tgz#7657125e84a4086a2dc797ff2d696d819a720fb5"
+collections@^0.2.0:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/collections/-/collections-0.2.2.tgz#1f23026b2ef36f927eecc901e99c5f0d48fa334e"
   dependencies:
-    mini-map "^1.0.0"
-    pop-arrayify "^1.0.0"
-    pop-clear "^1.0.0"
-    pop-clone "^1.0.1"
-    pop-compare "^1.0.0"
-    pop-equals "^1.0.0"
-    pop-has "^1.0.0"
-    pop-hash "^1.0.0"
-    pop-iterate "^1.0.1"
-    pop-observe "^2.0.2"
-    pop-swap "^1.0.0"
-    pop-zip "^1.0.0"
-    regexp-escape "0.0.1"
-    weak-map "^1.0.4"
+    weak-map "1.0.0"
 
 colors@0.x.x:
   version "0.6.2"
@@ -176,17 +159,13 @@ mandrill-api@1.0.x:
   version "1.0.45"
   resolved "https://registry.yarnpkg.com/mandrill-api/-/mandrill-api-1.0.45.tgz#163939cf486bd18277b0f3baf412c3e65d84a72d"
 
-"mime@>=1.2.11 <2.0.0":
+mime@^1.2.11:
   version "1.3.6"
   resolved "https://registry.yarnpkg.com/mime/-/mime-1.3.6.tgz#591d84d3653a6b0b4a3b9df8de5aa8108e72e5e0"
 
-"mimeparse@>=0.1.4 <0.2.0":
+mimeparse@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/mimeparse/-/mimeparse-0.1.4.tgz#dafb02752370fd226093ae3152c271af01ac254a"
-
-mini-map@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/mini-map/-/mini-map-1.0.0.tgz#9641e0115d99b3dc13711cf8cfda4c8199893f4e"
 
 minimist@~0.0.1:
   version "0.0.10"
@@ -213,111 +192,34 @@ pkginfo@0.2.x:
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/pkginfo/-/pkginfo-0.2.3.tgz#7239c42a5ef6c30b8f328439d9b9ff71042490f8"
 
-pop-arrayify@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/pop-arrayify/-/pop-arrayify-1.0.0.tgz#65522b3fe3ae21be4f8e8b2b9e44634c15a6c481"
-
-pop-clear@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/pop-clear/-/pop-clear-1.0.0.tgz#fc8164fc85f89f288f23b936b6801ea822ae4586"
-
-pop-clone@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/pop-clone/-/pop-clone-1.0.1.tgz#618d462497e96d06f9cda315b325cca3a2636038"
-  dependencies:
-    mini-map "^1.0.0"
-    pop-equals "^1.0.0"
-
-pop-compare@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/pop-compare/-/pop-compare-1.0.0.tgz#c732e22c27f0cfab80a217d45e7722b5ce151820"
-
-pop-equals@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/pop-equals/-/pop-equals-1.0.0.tgz#90414f8fda71a37f881d1e5e3a2e02ef0c3b7e0b"
-  dependencies:
-    mini-map "^1.0.0"
-
-pop-has@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/pop-has/-/pop-has-1.0.0.tgz#9b226b59b960ab65eab0b412dd5570dce90e651c"
-  dependencies:
-    pop-equals "^1.0.0"
-
-pop-hash@^1.0.0:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/pop-hash/-/pop-hash-1.0.1.tgz#bcd69454bd2f99ded20b5fc8a2b93d6b5fab44cc"
-  dependencies:
-    weak-map "^1.0.5"
-
-pop-iterate@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/pop-iterate/-/pop-iterate-1.0.1.tgz#ceacfdab4abf353d7a0f2aaa2c1fc7b3f9413ba3"
-
-pop-observe@^2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/pop-observe/-/pop-observe-2.0.2.tgz#5acb5ac6f24c7c6ffab2c32151b0adb740eef363"
-  dependencies:
-    pop-equals "^1.0.0"
-    pop-has "^1.0.0"
-    pop-swap "^1.0.0"
-
-pop-swap@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/pop-swap/-/pop-swap-1.0.0.tgz#88b440553e085d0179d32255b09f93aab9890c66"
-
-pop-zip@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/pop-zip/-/pop-zip-1.0.0.tgz#3dc114007b2cece74ff3b8cea73eb120c70db056"
-
 postmark@0.2.x:
   version "0.2.6"
   resolved "https://registry.yarnpkg.com/postmark/-/postmark-0.2.6.tgz#1c3ca374bcacc0a27a907c58cf5a91a6247d075a"
 
-"punycode@>=1.0.0 <1.1.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/punycode/-/punycode-1.0.0.tgz#ce9e6c6e9c1db5827174fceb12ff4938700a1bd3"
-
-q-io@>=1.1.0:
-  version "2.0.6"
-  resolved "https://registry.yarnpkg.com/q-io/-/q-io-2.0.6.tgz#f1c78276edc5d313153abfac5cec86aa06c83709"
+q-io@^1.13.2:
+  version "1.13.4"
+  resolved "https://registry.yarnpkg.com/q-io/-/q-io-1.13.4.tgz#a96a0a04ea26ada3f7fa432eb742d486c72cff2d"
   dependencies:
-    collections ">=2.0.1 <3.0.0"
-    mime ">=1.2.11 <2.0.0"
-    mimeparse ">=0.1.4 <0.2.0"
-    q ">=2.0.1 <3.0.0"
-    qs ">=0.6.6 <0.7.0"
-    url2 ">=2.0.0 <3.0.0"
+    collections "^0.2.0"
+    mime "^1.2.11"
+    mimeparse "^0.1.4"
+    q "^1.0.1"
+    qs "^6.4.0"
+    url2 "^0.0.0"
 
-q@>=0.8.12, "q@>=2.0.1 <3.0.0":
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/q/-/q-2.0.3.tgz#75b8db0255a1a5af82f58c3f3aaa1efec7d0d134"
-  dependencies:
-    asap "^2.0.0"
-    pop-iterate "^1.0.1"
-    weak-map "^1.0.5"
-
-q@^1.0.1:
+q@^1.0.1, q@^1.1.2, q@^1.4.1:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/q/-/q-1.5.0.tgz#dd01bac9d06d30e6f219aecb8253ee9ebdc308f1"
 
-"qs@>=0.6.6 <0.7.0":
-  version "0.6.6"
-  resolved "https://registry.yarnpkg.com/qs/-/qs-0.6.6.tgz#6e015098ff51968b8a3c819001d5f2c89bc4b107"
+qs@^6.4.0:
+  version "6.4.0"
+  resolved "https://registry.yarnpkg.com/qs/-/qs-6.4.0.tgz#13e26d28ad6b0ffaa91312cd3bf708ed351e7233"
 
-"querystring@>=0.1.0 <0.2.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/querystring/-/querystring-0.1.0.tgz#cb76a26cda0a10a94163fcdb3e132827f04b7b10"
-
-qx@~0.2.4:
-  version "0.2.4"
-  resolved "https://registry.yarnpkg.com/qx/-/qx-0.2.4.tgz#e53b26a163b3a677e1b9dc5f500992939f2e5399"
+qx@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/qx/-/qx-1.0.0.tgz#5814866d5ff50b38b81c9974fa7e59f7c79f5fba"
   dependencies:
-    q ">=0.8.12"
-
-regexp-escape@0.0.1:
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/regexp-escape/-/regexp-escape-0.0.1.tgz#3f326a062d8f7596b2914929550aac77eaf8de75"
+    q "^1.1.2"
 
 repeat-string@^1.5.2:
   version "1.6.1"
@@ -347,17 +249,17 @@ stack-trace@0.0.x:
   version "0.0.10"
   resolved "https://registry.yarnpkg.com/stack-trace/-/stack-trace-0.0.10.tgz#547c70b347e8d32b4e108ea1a2a159e5fdde19c0"
 
-styliner@0.8.x:
-  version "0.8.9"
-  resolved "https://registry.yarnpkg.com/styliner/-/styliner-0.8.9.tgz#3fb9cac34874231e22c19332a8861abb6ad733c5"
+styliner@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/styliner/-/styliner-1.0.3.tgz#00af1643d67d9aa2f2845e81f91847fb6a2578bd"
   dependencies:
     CSSselect "~0.3.0"
     cheerio "~0.10.1"
     lodash "~1.0.0-rc.3"
     parserlib ">0.2.0"
-    q "^1.0.1"
-    q-io ">=1.1.0"
-    qx "~0.2.4"
+    q "^1.4.1"
+    q-io "^1.13.2"
+    qx "^1.0.0"
     winston "~0.6.2"
 
 uglify-js@^2.6:
@@ -385,22 +287,13 @@ underscore@~1.4:
   version "1.4.4"
   resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.4.4.tgz#61a6a32010622afa07963bf325203cf12239d604"
 
-"url2@>=2.0.0 <3.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/url2/-/url2-2.0.0.tgz#90a3a367de39cb46af41602a0169ee868df4512c"
-  dependencies:
-    url ">=0.7.9 <0.8.0"
+url2@^0.0.0:
+  version "0.0.0"
+  resolved "https://registry.yarnpkg.com/url2/-/url2-0.0.0.tgz#4eaabd1d5c3ac90d62ab4485c998422865a04b1a"
 
-"url@>=0.7.9 <0.8.0":
-  version "0.7.9"
-  resolved "https://registry.yarnpkg.com/url/-/url-0.7.9.tgz#1959b1a8b361fc017b59513a7c7fa9827f5e4ed0"
-  dependencies:
-    punycode ">=1.0.0 <1.1.0"
-    querystring ">=0.1.0 <0.2.0"
-
-weak-map@^1.0.4, weak-map@^1.0.5:
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/weak-map/-/weak-map-1.0.5.tgz#79691584d98607f5070bd3b70a40e6bb22e401eb"
+weak-map@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/weak-map/-/weak-map-1.0.0.tgz#b66e56a9df0bd25a76bbf1b514db129080614a37"
 
 window-size@0.1.0:
   version "0.1.0"
