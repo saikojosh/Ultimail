@@ -39,13 +39,19 @@
     }
   ],
   "dependencies": {
-    "async": "1.5.x",
-    "handlebars": "4.0.x",
-    "mandrill-api": "1.0.x",
-    "object-extender": "1.2.x",
-    "postmark": "0.2.x",
-    "styliner": "^1.0.3",
-    "underscore": "1.8.x"
+    "middleware-engine": "^0.0.1",
+    "object-extender": "^2.0.3",
+    "ultimail-templating-handlebars": "^0.0.1",
+    "ultimail-styling-inline-css": "^0.0.1"
+  },
+  "devDependencies": {
+    "eslint": "latest",
+    "eslint-config-recombix": "latest",
+    "eslint-plugin-filenames": "latest",
+    "eslint-plugin-json": "latest",
+    "eslint-plugin-node": "^4.2.1",
+    "eslint-plugin-promise": "latest",
+    "ultimail-provider-postmark": "^0.0.1"
   },
   "engines": {
     "node": ">=6"
