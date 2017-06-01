@@ -1,32 +1,47 @@
+'use strict';
+
 /*
- * mailer.send() example.
+ * EXAMPLE: using mailer.send()
  */
 
-var Ultimail = require('../ultimail');
+/* eslint no-console: 0 */
+/* eslint node/no-unpublished-require: 0 */
+
+const path = require(`path`);
+const Ultimail = require(`../ultimail`);
+const ultimailProviderPostmark = require(`ultimail-provider-postmark`);
 
 // Create a new mailer.
-var mailer = new Ultimail({
-  provider: {
-    name:   'postmark',
-    apiKey: 'MY-API-KEY'
-  },
-  variables: {
-    brandName: 'Amazing Widgets Ltd',
-    website:   'http://www.aw-ltd.co.uk'
-  }
+const mailer = new Ultimail({
+	from: `webmaster@aw-ltd.co.uk`,
+	styles: true,
+	variables: {
+		brandName: `Amazing Widgets Ltd`,
+		website: `http://www.aw-ltd.co.uk`,
+	},
 });
 
-// Prepare and send an email immediately.
-mailer.send(__dirname + '/emailTemplates/welcome', {
-  to:   'user-email@aw-ltd.co.uk',
-  from: 'webmaster@aw-ltd.co.uk',
-  variables: {
-    firstName: 'Josh',
-    lastName:  'Cole'
-  }
-}, function (err, success) {
+// Setup Postmark.
+mailer.configure(`provider`, ultimailProviderPostmark({
+	apiKey: `my-postmark-server-api-key`,
+}));
 
-  console.log('err', err);
-  console.log('success', success);
-
+// Add a general middleware.
+mailer.use((email, options, next) => {
+	console.log(`Middleware email:`, email);
+	return next();
 });
+
+// Prepare an email for sending later.
+const templateDir = path.join(__dirname, `/emailTemplates/welcome`);
+const options = {
+	to: `user-email@aw-ltd.co.uk`,
+	variables: {
+		firstName: `Josh`,
+		lastName: `Cole`,
+	},
+};
+
+mailer.send(templateDir, options)
+	.then(result => console.log(`result`, result))
+	.catch(err => console.error(err));

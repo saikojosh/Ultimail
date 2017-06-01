@@ -1,42 +1,40 @@
+'use strict';
+
 /*
- * mailer.prepare() example.
+ * EXAMPLE: using mailer.prepare()
  */
 
-var Ultimail = require('../ultimail');
+/* eslint no-console: 0 */
+
+const path = require(`path`);
+const Ultimail = require(`../ultimail`);
 
 // Create a new mailer.
-var mailer = new Ultimail({
-  provider: {
-    name:   'postmark',
-    apiKey: 'MY-API-KEY'
-  },
-  variables: {
-    brandName: 'Amazing Widgets Ltd',
-    website:   'http://www.aw-ltd.co.uk'
-  }
+const mailer = new Ultimail({
+	from: `webmaster@aw-ltd.co.uk`,
+	styles: true,
+	variables: {
+		brandName: `Amazing Widgets Ltd`,
+		website: `http://www.aw-ltd.co.uk`,
+	},
+});
+
+// Add a general middleware.
+mailer.use((email, options, next) => {
+	console.log(`Middleware email:`, email);
+	return next();
 });
 
 // Prepare an email for sending later.
-mailer.prepare(__dirname + '/emailTemplates/welcome', {
-  to:   'user-email@aw-ltd.co.uk',
-  from: 'webmaster@aw-ltd.co.uk',
-  variables: {
-    firstName: 'Josh',
-    lastName:  'Cole'
-  }
-}, function (err, email) {
+const templateDir = path.join(__dirname, `/emailTemplates/welcome`);
+const options = {
+	to: `user-email@aw-ltd.co.uk`,
+	variables: {
+		firstName: `Josh`,
+		lastName: `Cole`,
+	},
+};
 
-  console.log('err', err);
-  console.log('email', email);
-
-  // Later we send the email...
-  /*
-  email.send(function (err, success) {
-
-    console.log('err', err);
-    console.log('success', success);
-
-  });
-  */
-
-});
+mailer.prepare(templateDir, options)
+	.then(email => console.log(`email`, email))
+	.catch(err => console.error(err));

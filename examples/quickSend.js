@@ -1,30 +1,47 @@
+'use strict';
+
 /*
- * mailer.quickSend() example.
+ * EXAMPLE: using mailer.quickSend()
  */
 
-var Ultimail = require('../ultimail');
+/* eslint no-console: 0 */
+/* eslint node/no-unpublished-require: 0 */
+
+const Ultimail = require(`../ultimail`);
+const ultimailProviderPostmark = require(`ultimail-provider-postmark`);
 
 // Create a new mailer.
-var mailer = new Ultimail({
-  provider: {
-    name:   'postmark',
-    apiKey: 'MY-API-KEY'
-  },
-  variables: {
-    brandName: 'Amazing Widgets Ltd',
-    website:   'http://www.aw-ltd.co.uk'
-  }
+const mailer = new Ultimail({
+	from: `webmaster@aw-ltd.co.uk`,
+	styles: true,
+	variables: {
+		brandName: `Amazing Widgets Ltd`,
+		website: `http://www.aw-ltd.co.uk`,
+	},
 });
 
-// Send an email immediately without any pre-processing.
-mailer.quickSend({
-  to:       'user-email@aw-ltd.co.uk',
-  from:     'webmaster@aw-ltd.co.uk',
-  subject:  'My Subject: {{firstName}}',
-  htmlBody: '<h1>Hello,  {{firstName}}!</h1>'
-}, function (err, success) {
+// Setup Postmark.
+mailer.configure(`provider`, ultimailProviderPostmark({
+	apiKey: `my-postmark-server-api-key`,
+}));
 
-  console.log('err', err);
-  console.log('success', success);
-
+// Add a general middleware.
+mailer.use((email, options, next) => {
+	console.log(`Middleware email:`, email);
+	return next();
 });
+
+// Prepare an email for sending later.
+const options = {
+	to: `user-email@aw-ltd.co.uk`,
+	variables: {
+		firstName: `Josh`,
+		lastName: `Cole`,
+	},
+};
+const htmlBody = `<h1>Hello, {{firstName}}!</h1>`;
+const plainBody = `Hello, {{firstName}}!`;
+
+mailer.quickSend(options, htmlBody, plainBody)
+	.then(result => console.log(`result`, result))
+	.catch(err => console.error(err));
