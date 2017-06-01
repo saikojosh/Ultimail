@@ -1,474 +1,319 @@
-/*
- * Ultimail.
- */
+'use strict';
 
-var fs         = require('fs');
-var pathify    = require('path').join;
-var async      = require('async');
-var handlebars = require('handlebars');
-var extender   = require('object-extender');
-var Styliner   = require('styliner');
-var _          = require('underscore');
+const filesystem = require(`fs`);
+const path = require(`path`);
+const MiddlewareEngine = require(`middleware-engine`);
+const extender = require(`object-extender`);
+const ultimailStylingInlineCss = require(`ultimail-styling-inline-css`);
+const ultimailTemplatingHandlebars = require(`ultimail-templating-handlebars`);
+const Email = require(`./modules/email`);
 
-/*
- * Constructor.
- */
-function Ultimail (options) {
+module.exports = class Ultimail extends MiddlewareEngine {
 
-  // Default options.
-  options = extender.defaults({
-    provider:  null,
-    styles:    true,
-    variables: null,
-    from:      null,
-    replyTo:   null,
-    useLayout: null
-  }, options);
+	/*
+	 * Instantiate a new mailer.
+	 */
+	constructor (_options) {
 
-  // Save the options.
-  this.options = options;
+		// Setup the middleware engine.
+		super({
+			chainMiddlewareResults: false,
+			throwOnMissingHandler: false,
+		});
 
-  // Load the default provider and view engine.
-  this.provider = this.loadProvider(options.provider);
+		// Ultimail specific options.
+		this.options = extender.defaults({
+			to: null,
+			cc: null,
+			bcc: null,
+			from: null,
+			replyTo: null,
+			attachments: null,
+			variables: null,
+			layoutTemplate: null,
+			styles: true,
+		}, _options);
+
+		// Configure the default handlers to simplify quick use.
+		this.configure(`templating`, ultimailTemplatingHandlebars());
+		this.configure(`styling`, ultimailStylingInlineCss());
+
+	}
+
+	/*
+	 * Prepares a new email for sending but does not send it.
+	 */
+	prepare (template, _options, callback = null) {
+
+		const options = extender.merge(this.options, _options);
+		const email = new Email(options);
+		const promise = this.__prepareEmail(email, template, options);
+
+		if (typeof callback === `function`) {
+			promise.then(() => callback(null, email)).catch(err => callback(err));
+		}
+		else {
+			return promise.then(() => email);
+		}
+
+	}
+
+	/*
+	 * Prepare and send an email. Accepts a template path or an email object as the input.
+	 */
+	send (input, _options = null, callback = null) {
+
+		const options = extender.merge(this.options, _options);
+		let template;
+		let email;
+		let needsPreparation;
+
+		// If we have been given a template path lets create a new email.
+		if (!this.isEmail(input)) {
+			template = input;
+			email = new Email(options);
+			needsPreparation = true;
+		}
+		else {
+			template = null;
+			email = input;
+			const canOverrideOptions = Boolean(_options);
+			if (canOverrideOptions) { email.set(options); }  // Some of the options may override the existing email's settings.
+			needsPreparation = false;
+		}
+
+		// Prepare and send the email.
+		const promise = Promise.resolve()
+			.then(() => {
+				if (needsPreparation) { return this.__prepareEmail(email, template, options); }
+			})
+			.then(() => this.__sendEmail(email, options));
+
+		if (typeof callback === `function`) {
+			promise.then(result => callback(null, result)).catch(err => callback(err));
+		}
+		else {
+			return promise.then(result => result);
+		}
+
+	}
+
+	/*
+	 * Send to the specific address(es) specified.
+	 */
+	sendTo (to, input, _options = null, callback = null) {
+		const options = _options || {};
+		options.to = to;
+		return this.send(input, options, callback);
+	}
+
+	/*
+	 * Quickly send an email with the given HTML and/or plain bodies without executing any of the handlers or middleware,
+	 * except for the "provider" handler used to send the email.
+	 */
+	quickSend (_options, htmlBody, plainBody, callback = null) {
+
+		const options = extender.merge(this.options, _options);
+		const email = new Email(options);
+
+		if (htmlBody) { email.htmlBody(htmlBody); }
+		if (plainBody) { email.plainBody(plainBody); }
+
+		const promise = this.__sendEmail(email, options);
+
+		if (typeof callback === `function`) {
+			promise.then(result => callback(null, result)).catch(err => callback(err));
+		}
+		else {
+			return promise.then(result => result);
+		}
+
+	}
+
+	/*
+	 * Returns true if the given input is an instance of the email class.
+	 */
+	isEmail (input) {
+		return (input instanceof Email);
+	}
+
+	/*
+	 * Merge together some default variables, the options and the variables specified in the options.
+	 */
+	__prepareVariables (options, extraVariables) {
+
+		return extender.merge(
+			{
+
+			},
+			options,
+			options.variables,
+			extraVariables
+		);
+
+	}
+
+	/*
+	 * Loads and returns the given file.
+	 */
+	__loadFile (cache, cacheKey, filename) {
+
+		return new Promise((resolve, reject) => {
+
+			filesystem.readFile(filename, `utf8`, (err, data) => {
+				if (err && err.code !== `NOTFOUND`) { return reject(err); }
+				cache[cacheKey] = data || ``;
+				return resolve();
+			});
+
+		});
+
+	}
+
+	/*
+	 * Loads and returns all the files relating to the given template.
+	 */
+	__loadTemplate (template) {
+
+		// No template to load.
+		if (!template) { return null; }
+
+		const cache = {
+			htmlBody: null,
+			plainBody: null,
+			subject: null,
+			css: null,
+		};
+
+		const htmlBodyFile = path.join(template, `body.html`);
+		const plainBodyFile = path.join(template, `body.txt`);
+		const subjectFile = path.join(template, `subject.txt`);
+		const cssFile = path.join(template, `styles.css`);
+
+		// Load all the files relating to the template and return them as a hash of strings.
+		return Promise.resolve()
+			.then(() => this.__loadFile(cache, `htmlBody`, htmlBodyFile))
+			.then(() => this.__loadFile(cache, `plainBody`, plainBodyFile))
+			.then(() => this.__loadFile(cache, `subject`, subjectFile))
+			.then(() => this.__loadFile(cache, `css`, cssFile))
+			.then(() => {
+				if (!cache.htmlBody && !cache.plainBody) {
+					throw new Error(`Can't find either "body.html" or "body.txt". At least one must exist in "${template}".`);
+				}
+				return cache;
+			});
+
+	}
+
+	/*
+	 * Converts the given path to an absolute path (using the current working directory of the process) if one only a
+	 * relative path is provided. Returns null if an invalid path is provided.
+	 */
+	__getAbsolutePath (input) {
+		if (!input || typeof input !== `string`) { return null; }
+		return (path.isAbsolute(input) ? input : path.join(process.cwd(), input));
+	}
+
+	/*
+	 * Prepares the given email using the given template and options.
+	 */
+	__prepareEmail (email, template, options) {
+
+		const actualTemplatePath = this.__getAbsolutePath(template);
+		const layoutTemplatePath = this.__getAbsolutePath(options.layoutTemplate);
+
+		return Promise.resolve()
+
+			// Load both templates.
+			.then(() => this.__loadTemplate(actualTemplatePath))
+			.then(actualTemplate =>
+				Promise.all([
+					actualTemplate,
+					this.__loadTemplate(layoutTemplatePath),
+				])
+			)
+
+			// Prepare both templates.
+			.then(([ actualTemplate, layoutTemplate ]) =>
+				this.__prepareTemplates(email, options, actualTemplate, layoutTemplate)
+			)
+
+			// Prepare both styles.
+			.then(([ actualTemplate, layoutTemplate ]) =>
+				this.__prepareStyles(email, options, actualTemplate, layoutTemplate)
+			)
+
+			// Run any remaining middleware.
+			.then(() => this.__executeMiddleware(email, options))
+
+			// Attach the send method to the email itself to allow "email.send(options);".
+			.then(() => email.send = this.__sendEmail.bind(this, email));
+
+	}
+
+	/*
+	 * Compile the actual (and optional layout) template.
+	 */
+	__prepareTemplates (email, options, actualTemplate, layoutTemplate) {
+
+		if (!actualTemplate) { throw new Error(`You must provide the path to a template directory.`); }
+
+		// If we can, ensure both templates have a subject.
+		if (layoutTemplate) {
+			if (actualTemplate.subject) { layoutTemplate.subject = actualTemplate.subject; }
+			else { actualTemplate.subject = layoutTemplate.subject; }
+		}
+
+		// Render the templates.
+		const extraVariables = (actualTemplate.subject ? { subject: actualTemplate.subject } : null);
+		const variables = this.__prepareVariables(options, extraVariables);
+
+		return this.__executeHandler(`templating`, email, actualTemplate, layoutTemplate, variables, options)
+			.then(() => [ actualTemplate, layoutTemplate]);
+
+	}
+
+	/*
+	 * Compile the CSS and merge it into the HTML.
+	 */
+	__prepareStyles (email, options, actualTemplate, layoutTemplate) {
+
+		// Do nothing if styles have been turned off or we don't have an HTML portion to our email.
+		if (!options.styles || !email.get(`htmlBody`)) { return Promise.resolve(); }
+
+		// Render the CSS.
+		const layoutCss = (layoutTemplate ? layoutTemplate.css : null) || ``;
+		const actualCss = actualTemplate.css || ``;
+		const css = `${layoutCss}\n\n${actualCss}`;
+
+		return this.__executeHandler(`styling`, email, css, options)
+			.then(() => [ actualTemplate, layoutTemplate]);
+
+	}
+
+	/*
+	 * Sends the given email, making sure we have all the required properties.
+	 */
+	__sendEmail (email, options) {
+
+		if (!email.get(`to`) || !email.get(`to`).length) {
+			throw new Error(`You must specify at least one "to" email address.`);
+		}
+
+		if (!email.get(`subject`)) {
+			throw new Error(`You must specify a subject.`);
+		}
+
+		if (!email.get(`from`)) {
+			throw new Error(`You must specify a from address.`);
+		}
+
+		if (!email.get(`htmlBody`) && !email.get(`plainBody`)) {
+			throw new Error(`Either a "htmlBody" or a "plainBody" needs to be specified.`);
+		}
+
+		return this.__executeHandler(`provider`, email, options);
+
+	}
 
 };
-
-/*
- * Sends an email. Default options can be overridden.
- * callback(err, success);
- * [Usage]
- *  [1] send(tpl, options, callback);
- *  [2] send(email, options, callback);
- */
-Ultimail.prototype.send = function (input, options, callback) {
-  if (!_.isFunction(callback)) { callback = this.emptyFn; }
-
-  options = extender.defaults({
-    provider: null
-  }, options);
-
-  var provider;
-
-  // Are we overriding the provider?
-  if (options.provider) {
-    provider = this.loadProvider(options.provider);
-  } else {
-    provider = this.provider;
-  }
-
-  // An email has been passed in.
-  if (this.isEmail(input)) { return provider.send(input, callback); }
-
-  // Otherwise prepare the email first.
-  this.prepare(input, options, function (err, email) {
-
-    if (err) { return callback(err); }
-
-    // Send the email via the provider.
-    return provider.send(email, callback);
-
-  });
-
-};
-
-/*
- * Sends a pre-prepared email using the provider. Doesn't do any pre-processing
- * on the email.
- */
-Ultimail.prototype.quickSend = function (options, callback) {
-  if (!_.isFunction(callback)) { callback = this.emptyFn; }
-
-  options = extender.defaults({
-    to:          null,
-    cc:          null,
-    bcc:         null,
-    from:        this.options.from,
-    replyTo:     this.options.replyTo,
-    subject:     null,
-    htmlBody:    null,
-    textBody:    null,
-    attachments: null,
-    provider:    null
-  }, options);
-
-  // Setup email.
-  var email = this.createEmail(options);
-
-  // Send the email!
-  return this.send(email, options, callback);
-
-};
-
-/*
- * Prepares an email. Default options can be overridden.
- * callback(err, email);
- */
-Ultimail.prototype.prepare = function (tpl, options, callback) {
-  if (!_.isFunction(callback)) { callback = this.emptyFn; }
-
-  options = extender.defaults({
-    to:          null,
-    cc:          null,
-    bcc:         null,
-    from:        this.options.from,
-    replyTo:     this.options.replyTo,
-    subject:     null,
-    attachments: null,
-    variables:   null,
-    styles:      null
-  }, options);
-
-  var instance    = this;
-  var tplSubject  = pathify(tpl, 'subject.txt');
-  var tplHtmlBody = pathify(tpl, 'body.html');
-  var tplTextBody = pathify(tpl, 'body.txt');
-  var variables   = extender.extend({}, this.options.variables, options.variables);
-  var styles      = (options.styles !== null ? options.styles : this.options.styles);
-
-  // Setup email.
-  var email = this.createEmail(options);
-
-  // Add some additional variables to use when parsing templates.
-  variables.email = {
-    to:      email.to,
-    cc:      email.cc,
-    bcc:     email.bcc,
-    from:    email.from,
-    replyTo: email.replyTo,
-    subject: ''  //update the subject after parsing it.
-  };
-
-  // Start preparing the email.
-  async.waterfall([
-
-    // Load the subject and process the template.
-    function prepareSubject (next) {
-
-      // Don't bother loading the template if we are overriding the subject.
-      if (options.subject) {
-        email.subject           = options.subject;
-        variables.email.subject = options.subject;
-        return next(null);
-      }
-
-      instance.prepareTemplate(null, 'subject', tplSubject, variables, function (err, output) {
-
-        if (err) { return next(err); }
-
-        // Save and continue.
-        email.subject           = output;
-        variables.email.subject = output;
-        return next(null);
-
-      });
-
-    },
-
-    // Compile the parent template if we have one.
-    function loadLayout (next) {
-
-      // Not using a parent template.
-      if (!instance.options.useLayout) { return next(null, null); }
-
-      var layout = {
-        dir:         instance.options.useLayout,
-        htmlBodyTpl: null,
-        textBodyTpl: null
-      };
-      var htmlBodyFile = pathify(layout.dir, 'body.html');
-      var textBodyFile = pathify(layout.dir, 'body.txt');
-
-      // Load in the HTML template.
-      fs.readFile(htmlBodyFile, function (err, data) {
-
-        // Ignore 'file doesn't exist' errors.
-        if (err && err.code !== 'ENOENT') { return next(err); }
-
-        // Compile the template.
-        try {
-          layout.htmlBodyTpl = (data ? handlebars.compile(data.toString()) : null);
-        }
-        catch (err) {
-          return next(err);
-        }
-
-        // Load in the text template.
-        fs.readFile(textBodyFile, function (err, data) {
-
-          // Ignore 'file doesn't exist' errors.
-          if (err && err.code !== 'ENOENT') { return next(err); }
-
-          // Compile the template.
-          try {
-            layout.textBodyTpl = (data ? handlebars.compile(data.toString()) : null);
-          }
-          catch (err) {
-            return next(err);
-          }
-
-          // Continue.
-          return next(null, layout);
-
-        });
-
-      });
-
-    },
-
-    // Load the HTML body and process the template.
-    function prepareHtmlBody (layout, next) {
-
-      instance.prepareTemplate(layout, 'html', tplHtmlBody, variables, function (err, output) {
-
-        if (err) { return next(err); }
-
-        // Save and continue.
-        email.htmlBody = output;
-        return next(null, layout);
-
-      });
-
-    },
-
-    // Load the text body and process the template.
-    function prepareTextBody (layout, next) {
-
-      instance.prepareTemplate(layout, 'text', tplTextBody, variables, function (err, output) {
-
-        if (err) { return next(err); }
-
-        // Save and continue.
-        email.textBody = output;
-        return next(null, layout);
-
-      });
-
-    },
-
-    // Process styles on the HTML body.
-    function inlineHTMLStyles (layout, next) {
-
-      // Skip if no HTML body.
-      if (!email.htmlBody) { return next(null); }
-
-      // Styles have been disabled.
-      if (!styles) { return next(null); }
-
-      var stylinerOptions = {
-        compact: true,
-        fixYahooMQ: true,
-        keepInvalid: true,
-      };
-
-      // Inline the styles in stages.
-      async.waterfall([
-
-        function layoutStyles (nextStyle) {
-
-          var styliner = new Styliner(layout.dir, stylinerOptions);
-
-          // Inline the CSS styles.
-          styliner.processHTML(email.htmlBody)
-          .then(function(source) {
-
-            // Save and continue.
-            email.htmlBody = source;
-            return nextStyle(null);
-
-          })
-          .catch(function (err) {
-            return nextStyle(err);
-          });
-
-        },
-
-        function templateStyles (nextStyle) {
-
-          var styliner = new Styliner(tpl, stylinerOptions);
-
-          // Inline the CSS styles.
-          styliner.processHTML(email.htmlBody)
-          .then(function(source) {
-
-            // Save and continue.
-            email.htmlBody = source;
-            return nextStyle(null);
-
-          })
-          .catch(function (err) {
-            return nextStyle(err);
-          });
-
-        }
-
-      ], function (err) {
-        if (err) { return next(err); }
-        return next(err, email);
-      });
-
-    }
-
-  ], function (err) {
-    if (err) { return callback(err); }
-    return callback(err, email);
-  });
-
-};
-
-/*
- * Returns a new email object.
- */
-Ultimail.prototype.createEmail = function (options) {
-
-  // Default to Null if no values are set.
-  var to              = options.to       || null;
-  var cc              = options.cc       || null;
-  var bcc             = options.bcc      || null;
-  var subject         = options.subject  || '';
-  var htmlBody        = options.htmlBody || '';
-  var textBody        = options.textBody || '';
-  var trailingLinesRE = /(?:\r\n?|\n?)+$/;
-
-  // Typecast values to arrays.
-  if (to  !== null) { to  = (_.isArray(to)  ? to  : [to]);  }
-  if (cc  !== null) { cc  = (_.isArray(cc)  ? cc  : [cc]);  }
-  if (bcc !== null) { bcc = (_.isArray(bcc) ? bcc : [bcc]); }
-
-  // Create the email.
-  var email = {
-    to:          to,
-    cc:          cc,
-    bcc:         bcc,
-    from:        options.from                          || null,
-    replyTo:     options.replyTo                       || null,
-    subject:     subject.replace(trailingLinesRE, '')  || null,
-    htmlBody:    htmlBody.replace(trailingLinesRE, '') || null,
-    textBody:    textBody.replace(trailingLinesRE, '') || null,
-    attachments: options.attachments                   || []
-  };
-
-  var instance = this;
-
-  /*
-   * A method for sending emails later.
-   * callback(err, success);
-   * [Usage]
-   *  [1] email.send(options, callback);
-   *  [2] email.send(callback);
-   */
-  email.send = function (p1, p2) {
-
-    var options, callback;
-
-    // [1] email.send(options, callback);
-    if (_.isFunction(p2)) {
-      options  = p1;
-      callback = p2;
-    }
-    // [2] email.send(callback);
-    else {
-      options  = null;
-      callback = p1;
-    }
-
-    // Ensure callback is defined.
-    if (!_.isFunction(callback)) { callback = this.emptyFn; }
-
-    // Send the email.
-    instance.send(email, options, callback);
-
-  };
-
-  return email;
-
-};
-
-/*
- * Load and parse the template.
- * callback(err, output);
- */
-Ultimail.prototype.prepareTemplate = function (layout, tplType, tplName, variables, callback) {
-
-  // Load the template.
-  fs.readFile(tplName, function (err, data) {
-
-    // No template.
-    if (err || !data) { return callback(null); }
-
-    // Compile the handlebars template.
-    try {
-      var emailTpl    = handlebars.compile(data.toString());
-      var emailOutput = emailTpl(variables);
-    }
-    catch (err) {
-      return callback(err);
-    }
-
-    var finalOutput;
-
-    // Do we have a parent layout to use?
-    if (tplType === 'html' && layout.htmlBodyTpl) {
-      finalOutput = layout.htmlBodyTpl({ template: emailOutput });
-    }
-    else if (tplType === 'text' && layout.textBodyTpl) {
-      finalOutput = layout.textBodyTpl({ template: emailOutput });
-    }
-    else {
-      finalOutput = emailOutput;
-    }
-
-    // Success!
-    return callback(null, finalOutput);
-
-  });
-
-};
-
-/*
- * Returns the given provider.
- */
-Ultimail.prototype.loadProvider = function (options) {
-
-  var name     = (_.isObject(options) ? options.name : options);
-  var Provider = (name ? require('./providers/' + name + '.js') : null);
-
-  // Setup the provider.
-  if (Provider) { return new Provider(options); }
-
-  return null;
-
-};
-
-/*
- * Returns the given view engine.
- */
-Ultimail.prototype.isEmail = function (input) {
-
-  // Must be a hash.
-  if (!_.isObject(input))               { return false; }
-
-  // Check properties.
-  if (_.isUndefined(input.to))          { return false; }
-  if (_.isUndefined(input.cc))          { return false; }
-  if (_.isUndefined(input.bcc))         { return false; }
-  if (_.isUndefined(input.from))        { return false; }
-  if (_.isUndefined(input.replyTo))     { return false; }
-  if (_.isUndefined(input.subject))     { return false; }
-  if (_.isUndefined(input.htmlBody))    { return false; }
-  if (_.isUndefined(input.textBody))    { return false; }
-  if (_.isUndefined(input.attachments)) { return false; }
-
-  // Success! The input is an email.
-  return true;
-
-};
-
-/*
- * An empty function for to use if callbacks aren't specified.
- */
-Ultimail.prototype.emptyFn = function () {};
-
-/*
- * Export the constructor.
- */
-module.exports = Ultimail;
