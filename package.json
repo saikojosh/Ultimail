@@ -11,14 +11,24 @@
   "description": "The ultimate emailer module for Node.js.",
   "keywords": [
     "email",
+    "emails",
     "emailer",
+    "send",
+    "sending",
     "postmark",
     "mandrill",
     "template",
+    "templates",
     "templating",
+    "styling",
+    "style",
+    "styles",
+    "css",
     "html",
     "plain",
-    "text"
+    "text",
+    "body",
+    "subject"
   ],
   "main": "ultimail.js",
   "author": "Josh Cole <saikojosh@gmail.com> (http://www.JoshuaCole.me)",
@@ -36,6 +46,9 @@
     "postmark": "0.2.x",
     "styliner": "^1.0.3",
     "underscore": "1.8.x"
+  },
+  "engines": {
+    "node": ">=6"
   },
   "license": "MIT"
 }
