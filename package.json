@@ -39,10 +39,10 @@
     }
   ],
   "dependencies": {
-    "middleware-engine": "^0.0.1",
+    "middleware-engine": "^0.0.6",
     "object-extender": "^2.0.3",
-    "ultimail-templating-handlebars": "^0.0.1",
-    "ultimail-styling-inline-css": "^0.0.1"
+    "ultimail-styling-inline-css": "^0.0.1",
+    "ultimail-templating-handlebars": "^0.0.1"
   },
   "devDependencies": {
     "eslint": "latest",
