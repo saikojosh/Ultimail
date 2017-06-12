@@ -91,15 +91,15 @@ module.exports = class Email {
 	 */
 	set (values) {
 
-		if (typeof values !== `object` && !Array.isArray(values)) {
-			throw new Error(`You must provide a hash of values to the .set() method.`);
-		}
+		if (typeof values !== `object`) { throw new Error(`You must provide a hash of values to the .set() method.`); }
 
 		// Set each value in turn.
 		Object.keys(values).forEach(key => {
 			const value = values[key];
 			const setter = this[key];
-			if (typeof setter === `function`) { setter.call(this, value); }
+
+			if (typeof setter !== `function`) { throw new Error(`The property "${key}" does not have a setter method.`); }
+			setter.call(this, value);
 		});
 
 	}
