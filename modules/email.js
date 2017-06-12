@@ -112,6 +112,8 @@ module.exports = class Email {
 			setter.call(this, value);
 		});
 
+		return this;
+
 	}
 
 	/*
