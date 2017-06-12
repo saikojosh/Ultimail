@@ -144,9 +144,7 @@ module.exports = class Ultimail extends MiddlewareEngine {
 	__prepareVariables (options, extraVariables) {
 
 		return extender.merge(
-			{
-
-			},
+			{},
 			options,
 			options.variables,
 			extraVariables
