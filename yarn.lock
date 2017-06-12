@@ -888,9 +888,9 @@ methods@~1.1.1:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/methods/-/methods-1.1.2.tgz#5529a4d67654134edcc5266656835b0f851afcee"
 
-middleware-engine@^0.0.6:
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/middleware-engine/-/middleware-engine-0.0.6.tgz#1ec7e8e3a5eca6c9e897f45155703178df810d8f"
+middleware-engine@^0.0.7:
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/middleware-engine/-/middleware-engine-0.0.7.tgz#78929eb365973fcbbaeb96231012153894392e1b"
   dependencies:
     object-extender "^2.0.3"
 

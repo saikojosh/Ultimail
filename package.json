@@ -39,7 +39,7 @@
     }
   ],
   "dependencies": {
-    "middleware-engine": "^0.0.6",
+    "middleware-engine": "^0.0.7",
     "object-extender": "^2.0.3",
     "ultimail-styling-inline-css": "^0.0.1",
     "ultimail-templating-handlebars": "^0.0.1"
