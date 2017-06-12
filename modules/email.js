@@ -27,7 +27,7 @@ module.exports = class Email {
 		};
 
 		// Correctly set the properties if a hash was passed in.
-		if (_properties) { this.set(_properties); }
+		if (_properties) { this.__set(_properties, true); }
 
 	}
 
@@ -90,6 +90,13 @@ module.exports = class Email {
 	 * Allows setting multiple values at once.
 	 */
 	set (values) {
+		return this.__set(values);
+	}
+
+	/*
+	 * Internal setter that allows ignoring of invalid properties.
+	 */
+	__set (values, ignoreInvalidProperties = false) {
 
 		if (typeof values !== `object`) { throw new Error(`You must provide a hash of values to the .set() method.`); }
 
@@ -98,7 +105,10 @@ module.exports = class Email {
 			const value = values[key];
 			const setter = this[key];
 
-			if (typeof setter !== `function`) { throw new Error(`The property "${key}" does not have a setter method.`); }
+			if (!ignoreInvalidProperties && typeof setter !== `function`) {
+				throw new Error(`The property "${key}" does not have a setter method.`);
+			}
+
 			setter.call(this, value);
 		});
 
