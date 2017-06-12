@@ -25,7 +25,7 @@ mailer.use((email, options, next) => {
 	return next();
 });
 
-// Prepare an email for sending later.
+// Prepare some variables.
 const templateDir = path.join(__dirname, `/emailTemplates/welcome`);
 const options = {
 	to: `user-email@aw-ltd.co.uk`,
@@ -35,6 +35,7 @@ const options = {
 	},
 };
 
+// Prepare an email for sending later.
 mailer.prepare(templateDir, options)
 	.then(email => console.log(`email`, email))
 	.catch(err => console.error(err));

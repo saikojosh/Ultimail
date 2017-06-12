@@ -31,7 +31,7 @@ mailer.use((email, options, next) => {
 	return next();
 });
 
-// Prepare an email for sending later.
+// Prepare some variables.
 const options = {
 	to: `user-email@aw-ltd.co.uk`,
 	variables: {
@@ -42,6 +42,7 @@ const options = {
 const htmlBody = `<h1>Hello, {{firstName}}!</h1>`;
 const plainBody = `Hello, {{firstName}}!`;
 
+// Send the email without preparing any templates or CSS.
 mailer.quickSend(options, htmlBody, plainBody)
 	.then(result => console.log(`result`, result))
 	.catch(err => console.error(err));
