@@ -20,6 +20,7 @@ module.exports = class Email {
 			bcc: [],
 			from: null,
 			replyTo: null,
+			subject: null,
 			htmlBody: null,
 			plainBody: null,
 			attachments: [],

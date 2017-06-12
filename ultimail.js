@@ -28,6 +28,7 @@ module.exports = class Ultimail extends MiddlewareEngine {
 			bcc: null,
 			from: null,
 			replyTo: null,
+			subject: null,
 			attachments: null,
 			variables: null,
 			layoutTemplate: null,
@@ -258,8 +259,14 @@ module.exports = class Ultimail extends MiddlewareEngine {
 
 		if (!actualTemplate) { throw new Error(`You must provide the path to a template directory.`); }
 
-		// If we can, ensure both templates have a subject.
-		if (layoutTemplate) {
+		// If a subject was passed as an option that takes precedence.
+		if (options.subject) {
+			actualTemplate.subject = options.subject;
+			layoutTemplate.subject = options.subject;
+		}
+
+		// Otherwise, attempt to ensure both templates have a subject from the the subject.txt files.
+		else if (layoutTemplate) {
 			if (actualTemplate.subject) { layoutTemplate.subject = actualTemplate.subject; }
 			else { actualTemplate.subject = layoutTemplate.subject; }
 		}
