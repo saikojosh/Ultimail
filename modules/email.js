@@ -105,11 +105,12 @@ module.exports = class Email {
 			const value = values[key];
 			const setter = this[key];
 
-			if (!ignoreInvalidProperties && typeof setter !== `function`) {
-				throw new Error(`The property "${key}" does not have a setter method.`);
+			if (typeof setter !== `function`) {
+				if (!ignoreInvalidProperties) { throw new Error(`The property "${key}" does not have a setter method.`); }
 			}
-
-			setter.call(this, value);
+			else {
+				setter.call(this, value);
+			}
 		});
 
 		return this;
