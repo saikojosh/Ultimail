@@ -160,7 +160,7 @@ module.exports = class Ultimail extends MiddlewareEngine {
 		return new Promise((resolve, reject) => {
 
 			filesystem.readFile(filename, `utf8`, (err, data) => {
-				if (err && err.code !== `NOTFOUND`) { return reject(err); }
+				if (err && err.code !== `ENOENT`) { return reject(err); }
 				cache[cacheKey] = data || ``;
 				return resolve();
 			});
