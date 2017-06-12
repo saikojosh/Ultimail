@@ -1,43 +1,60 @@
 # Ultimail
-Ultimail sends templated emails using a given provider. Templates are written using ordinary HTML and CSS, which is combined and parsed by a view engine prior to sending. This allows an email to be written once, and then customised with if statements and variables.
+The ultimate emailer module for Node.js: Ultimail compiles HTML and CSS templates and sends them using the email provider you configure. By default, Ultimail uses the [Handlebars](https://www.npmjs.com/package/handlebars) module for compiling HTML templates and the [Inline CSS](https://www.npmjs.com/package/inline-css) module for parsing CSS.
 
-## Notes
+## Quick Start
+The following example code will send an email via [Postmark](https://postmarkapp.com) using the [Ultimail-Provider-Postmark](https://www.npmjs.com/package/ultimail-provider-postmark) module. Before you can run the example you'll first need to setup an email template, or you can just run the example included with this module: `node ./examples/send.js`.
 
-#### Working Examples
+```javascript
+const path = require(`path`);
+const Ultimail = require(`ultimail`);
+const ultimailProviderPostmark = require(`ultimail-provider-postmark`);
+
+// Create a new mailer.
+const mailer = new Ultimail({
+	from: `webmaster@aw-ltd.co.uk`,
+	styles: true,
+	variables: {
+		brandName: `Amazing Widgets Ltd`,
+		website: `http://www.aw-ltd.co.uk`,
+	},
+});
+
+// Setup Postmark.
+mailer.configure(`provider`, ultimailProviderPostmark({
+	apiKey: `{{YOUR_API_KEY}}`,
+}));
+
+// Prepare an email for sending later.
+const templateDir = path.join(__dirname, `/emailTemplates/welcome`);
+const options = {
+	to: `user-email@aw-ltd.co.uk`,
+	variables: {
+		firstName: `Josh`,
+		lastName: `Cole`,
+	},
+};
+
+mailer.send(templateDir, options)
+	.then(result => console.log(`result`, result))
+	.catch(err => console.error(err));
+```
+
+### Working Examples
 A few working examples can be found in the `/examples` directory.
 
-#### Email Providers
-Ultimail ships with support for a number of email providers. You will need to ensure you have the appropriate permissions/accounts setup to use them.
-
-1. Postmark (www.postmarkapp.com)
-2. Mandrill (www.mandrill.com)
-
-
-These providers only provide basic support at present. If you need a particular provider or want to add additional functionality to an exiting provider please submit a pull request.
-
-
-#### Email Limits
-Email limits are set by the email provider you use, this includes number of recipients, email addresses you can send from and attachment limits.
-
-#### View Engine
-At present Ultimail uses [Handlebars](http://handlebarsjs.com/) as its view engine. There may be scope to implement other view engines at a later date. For the time being if you want to use another view engine you can use the `quickSend()` method detailed below and pass in the compiled HTML and text bodies.
+### Promises and Callbacks
+Every method returns a promise unless you pass in a callback as the final parameter. All callbacks have the signature `callback(err, returnValue) { ... }`.
 
 ## Email Templates
 Ultimail uses templates for sending email. Each template typically has 4 files:
 
-- **body.html** - The HTML body of the email. Will be processed by the view engine.
-- **body.txt** - The plain text body of the email. Will be processed by the view engine.
-- **styles.css** - CSS for the HTML body. You can name this anything you want, and has as many external files as you want.
-- **subject.txt** - The subject. Will be processed by the view engine.
+- **body.html** - The HTML body of the email. Will be processed by the templating handler.
+- **body.txt** - The plain text body of the email. Will be processed by the templating handler.
+- **styles.css** - CSS for the HTML body.
+- **subject.txt** - The subject. Will be processed by the templating handler.
 
-### Layouts (Parent) Templates
-Ultimail also supports layout/parent templates which can be shared between all templates used with a given mailer instance. Each mailer can only have one layout template. These are great if you have a standard format for your HTML or text emails and you want to share that between several different email templates.
-
-In your layout templates you need to use the `{{{template}}}` variable to designate where the email template should be included. `subject.txt` is not required for layouts.
-
-
-#### Directory Structure
-All email templates should be contained within a base directory, with each template having it's own sub directory. You can also add a directory for each of your layout templates.
+### Suggested Directory Structure
+Each email template should be contained within its own directory and have either a `body.html` or `body.txt` file. Layout templates are defined in exactly the same way as email templates.
 
 ```javascript
 /emailTemplates
@@ -57,201 +74,268 @@ All email templates should be contained within a base directory, with each templ
     /subject.txt
 ```
 
-#### External CSS
-You can include as many external CSS files in your HTML body as you want, using the standard `<link>` tag. For best results store all of your external CSS files in the template directory and avoid linking to remote CSS files.
+### Layout (Parent) Templates
+Ultimail supports layout/parent templates which can be shared between all templates used with a given mailer instance. Each mailer can only have one layout template, but this can be overridden when preparing or sending an email. These are great if you have a standard header/footer/design for your HTML or text emails and you want to share that between several different email templates.
 
-```html
-<link rel="stylesheet" type="text/css" href="styles.css">
-```
+Assuming you are using Handlebars (the default) as your templating handler, you will need to place the `{{{template}}}` variable to designate where the email template should be included in the layout. If the layout and email templates both contain a `subject.txt` file, the one in the email template will be used.
 
-For these CSS includes to work you must specify the `templateDirectory` parameter as an absolute path when using `mailer.send()` and `mailer.prepare()`.
+## Attachments
+You can add multiple attachments to an email by specifying objects that include the following properties:
 
-## Initialise Ultimail
-Create a new mailer instance with some global options. The mailer can then be used to send multiple different emails.
+* **filename** - The name of the file.
+* **mimeType** - The Internet mime type of the file.
+* **buf** - A buffer containing the raw data of the file.
+
+There are three ways to add attachments to emails:
 
 ```javascript
-var Ultimail = require('ultimail');
+// Add default attachments to every email sent by a mailer.
+const mailer = new Ultimail({
+	attachments: [{
+		filename: `Some photo.jpg`,
+		mimeType: `image/jpeg`,
+		buf: <buffer>,
+	}, {
+		...
+	}],
+});
 
-var mailer = new Ultimail({
-  provider: {
-    name:   'postmark',
-    apiKey: 'ABC-123-XYZ'
-  },
-  styles:    true,
-  useLayout: '/path/to/layout/directory',
-  variables: {
-    brandName: 'Amazing Widgets Ltd',
-    website:   'http://www.aw-ltd.co.uk'
-  }
+// Add attachments when preparing or sending an email.
+const email = mailer.prepare(template, {
+	attachments: [{
+		filename: `Some photo.jpg`,
+		mimeType: `image/jpeg`,
+		buf: <buffer>,
+	}, {
+		...
+	}],
+});
+
+// Add attachments to a pre-prepared email.
+email.attachments(
+	[{
+		filename: `Some photo.jpg`,
+		mimeType: `image/jpeg`,
+		buf: <buffer>,
+	}, {
+		...
+	}]
+);
+```
+
+## Additional Middleware
+You can also add extra middleware functions which are run once the templates and styles have been processed (both when preparing and sending emails):
+
+```javascript
+mailer.use((email, options, next) => {
+	console.log(`Middleware email:`, email);
+	if (!email.get(`plainBody`)) { return next(new Error(`A text/plain body is required`)); }
+	return next(null);
 });
 ```
 
-#### Constructor Parameters
-```javascript
-new Ultimail(options);
-```
+To modify the email object you can use these methods to overwrite the relevant values:
 
-- **"options"** - A hash of options to initialise the mailer with.
+* `email.to(someValue)` - An array of or comma-delimited string of email addresses.
+* `email.cc(someValue)` - An array of or comma-delimited string of email addresses.
+* `email.bcc(someValue)` - An array of or comma-delimited string of email addresses.
+* `email.from(someValue)` - A single email address to set the "from" field.
+* `email.replyTo(someValue)` - A single email address to set the "reply-to" field.
+* `email.subject(someValue)` - Set the subject.
+* `email.htmlBody(someValue)` - Set the HTML body of the email.
+* `email.plainBody(someValue)` - Set the text/plain body of the email.
+* `email.attachment()` - Add one attachment to the email without overwriting any of the previous attachments. See the section "Attachments" above for the object shape.
+* `email.attachments()` - Add multiple attachments to the email, replacing any previous attachments. See the section "Attachments" above for the object shape.
+* `email.set(hashOfProperties)` - Update multiple properties at once by specifying a hash of properties where the keys are the same as the above function names.
 
-#### Constructor Options
-- **"provider"**  - A hash containing properties required to setup the email provider OR a string of provider name.
-  - **"name"**      - The name of the provider e.g. `postmark`. Required if `provider` is a hash.
-  - **apiKey**      - Your own API key for the provider. Required if `provider` is a hash.
-- **"styles"**    - Set `true` to inline the template's external CSS styles into the HTML body. Default `true`.
-- **useLayout**   - Provide the path to a layout template directory if you want your email templates to share common formatting.
-- **"variables"** - A hash of variables to use with the view engine.
-- **"from"**      - Set a global 'from' address to use for this mailer (optional).
-- **"replyTo"**   - Set a global 'replyTo' address to use for this mailer (optional).
+## Handlers
+Ultimail uses the concept of "handlers" which are essentially just specialised middleware functions that perform a specific action. There are three types of handlers: "templating", "styling", and "provider".
 
-## Sending an Email
-To send an email you use the `mailer.send()` method and specify the path to the directory where the template is stored, a hash of options and a callback.
+### Templating Handlers
+A templating handler needs to be configured for each mailer and will be responsible for parsing the HTML and plain text body files in the template directory.
 
-```javascript
-mailer.send('/path/to/template/directory/', {
-  to:   'my-user@email.com',
-  from: 'hello@my-website.com',
-  variables: {
-    firstName: 'Bob',
-    lastName:  'Smith'
-  }
-}, function (err, success) {
+**Note:** By default, Ultimail comes configured with the [Ultimail-Templating-Handlebars](https://www.npmjs.com/package/ultimail-templating-handlebars) module so you do not need to configure a templating handler unless you wish to change it.
 
-  // Do something else...
-
-});
-```
-
-#### Send Parameters
-```javascript
-mailer.send(templateDirectory, options, callback);
-```
-
-- **"templateDirectory"** OR **"email"** - The path to the directory where the template files are stored (this **must** be an absolute path) OR an email object.
-- **"options"** - A hash of options to send the email with.
-- **"callback"** - The function to call when we're finished, with the following parameters:
-  - **"err"** - Either an error object or `Null`.
-  - **"success"** - Either `true` or `false`.
-
-#### Send Options
-- **"to"**          - A string/array of email addresses to send to.
-- **"cc"**          - A string/array of email address to 'cc'.
-- **"bcc"**         - A string/array of email address to 'bcc'.
-- **"from"**        - An email address to send from.
-- **"replyTo"**     - An email address for the recipient to reply to.
-- **"subject"**     - Override the template subject with a new one.
-- **"attachments"** - An array of attachment objects.
-  - **"filename"** - The filename of the attachment.
-  - **"mimeType"** - The mime type of the attachment.
-  - **"data"** - The content of the file encoded as a base64 string.
-- **"variables"**   - A hash of variables to use with the view engine. Individual variables can overwrite those in the global `variables` option.
-- **"styles"**      - Override the global `styles` option with `true` or `false`.
-- **"provider"**    - Override the global `provider`. See Constructor Options.
-
-## Quick Send
-Send an email without any pre-processing by using `mailer.quickSend()`.
+#### Configuring
+To configure a templating handler:
 
 ```javascript
-mailer.quickSend({
-  to:       'my-user@email.com'
-  from:     'hello@my-website.com',
-  subject:  'Welcome',
-  htmlBody: '<h1>Hello</h1>',
-  textBody: 'Hello'
-}, function (err, success) {
+const Ultimail = require(`ultimail`);
+const ultimailTemplatingHandlebars = require(`ultimail-templating-handlebars`);
 
-  // Do something else...
+const mailer = new Ultimail({ ... });
 
-});
+mailer.configure(`templating`, ultimailTemplatingHandlebars());
 ```
 
-#### Quick Send Parameters
+#### Writing Your Own
+You can write your own templating middleware by following the conventions outlined below. See the source code of the [Ultimail-Templating-Handlebars](https://github.com/saikojosh/Ultimail-Templating-Handlebars) module for a working example.
+
+**Middleware Signature:**
+Your middleware will be passed these parameters:
+
 ```javascript
-mailer.quickSend(options, callback);
+function (email, actualTemplate, layoutTemplate, variables, options, next) { ... }
 ```
 
-- **"options"** - A hash of options to send the email with.
-- **"callback"** - The function to call when we're finished, with the following parameters:
-  - **"err"** - Either an error object or `Null`.
-  - **"success"** - Either `true` or `false`.
+* `email` - the email Ultimail will be sending.
+* `actualTemplate` - The email template specified by the user.
+* `layoutTemplate` - The layout template, if one was specified.
+* `variables` - The hash of variables that can be used in the template.
+* `options` - The options passed to the Ultimail constructor or method.
+* `next` - callback.
 
-#### Quick Send Options
+**Callback Signature:**
+You must always call the `next()` callback when you have finished, errors will be caught but it's a better practice to pass them to the callback. There is no need to pass the email back in the callback as this is handled automatically.
 
-- **"to"**          - A string/array of email addresses to send to.
-- **"cc"**          - A string/array of email address to 'cc'.
-- **"bcc"**         - A string/array of email address to 'bcc'.
-- **"from"**        - An email address to send from.
-- **"replyTo"**     - An email address for the recipient to reply to.
-- **"subject"**     - Override the template subject with a new one.
-- **"attachments"** - An array of attachment objects.
-  - **"filename"** - The filename of the attachment.
-  - **"mimeType"** - The mime type of the attachment.
-  - **"data"** - The content of the file encoded as a base64 string.
-- **"htmlBody"**    - The string to use as the HTML body.
-- **"textBody"**    - The string to use as the plain text body.
-- **"provider"**    - Override the global `provider`. See Constructor Options.
-
-## Prepare an Email (but don't send)
-You can prepare an email for sending later by using the `mailer.prepare()` method. The options are the same as `mailer.send()`, except the `provider` option can't be specified. When you're ready to send the email, simply call `mailer.send()` with the email or `email.send()`.
-
-#### Prepare Parameters
 ```javascript
-mailer.prepare(templateDirectory, options, callback);
+return next(err);
 ```
 
-- **"templateDirectory"** - The path to the directory where the template files are stored (this **must** be an absolute path).
-- **"options"** - A hash of options to send the email with.
-- **"callback"** - The function to call when we're finished, with the following parameters:
-  - **"err"** - Either an error object or `Null`.
-  - **"email"** - The prepared email object.
+**Template Objects:**
+Template files are automatically loaded from disk and converted to strings so you don't have to worry about that. The `actualTemplate` parameter is the email template specified by the user and the `layoutTemplate` is the layout, if one was specified. Both parameters are template objects which have the following shape:
 
-#### Send with `mailer.sendEmail()`
-You can change the provider for this one email by passing the `provider` option to `mailer.send()`. See Constructor Options for more information on the provider.
 ```javascript
-mailer.prepare('/path/to/template/directory/', {
-  to:   'my-user@email.com'
-  from: 'hello@my-website.com',
-  variables: {
-    firstName: 'Bob',
-    lastName:  'Smith'
-  }
-}, function (err, email) {
-
-  // Do something else...
-
-  // Send the email.
-  mailer.send(email, null, function (err, success) {
-
-    // Continue...
-
-  });
-
-});
+{
+	htmlBody: String || null,
+	plainBody: String || null,
+	subject: String || null,
+	css: String || null,
+}
 ```
 
-#### Send with `email.send()`
-You can change the provider for this one email by passing the `provider` option to `email.send()`. See Constructor Options for more information on the provider.
+**Updating the Email:**
+You can update the email by calling certain methods on it and passing in the output from your middleware:
+
+* To update the HTML body: `email.htmlBody(htmlBody)`.
+* To update the text/plain body: `email.plainBody(plainBody)`.
+* To update the subject: `email.subject(subject)`.
+
+### Styling Handlers
+A styling handler needs to be configured for each mailer and will be responsible for parsing the CSS in the template directory and inlining it into the HTML body returned by the templating handler.
+
+**Note:** By default, Ultimail comes configured with the [Ultimail-Styling-Inline-CSS](https://www.npmjs.com/package/ultimail-styling-inline-css) module so you do not need to configure a styling handler unless you wish to change it.
+
+#### Configuring
+To configure a styling handler:
+
 ```javascript
-mailer.prepare('/path/to/template/directory/', {
-  to:   'my-user@email.com'
-  from: 'hello@my-website.com',
-  variables: {
-    firstName: 'Bob',
-    lastName:  'Smith'
-  }
-}, function (err, email) {
+const Ultimail = require(`ultimail`);
+const Ultimail = require(`ultimail`);
+const ultimailStylingInlineCss = require(`ultimail-styling-inline-css`);
 
-  // Do something else...
+const mailer = new Ultimail({ ... });
 
-  // Send the email.
-  email.send(null, function (err, success) {
-    // Continue...
-  });
-
-});
+mailer.configure(`styling`, ultimailStylingInlineCss());
 ```
 
-**`email.send()` Parameters**
+#### Writing Your Own
+You can write your own styling middleware by following the conventions outlined below. See the source code of the [Ultimail-Styling-Inline-CSS](https://github.com/saikojosh/Ultimail-Styling-Inline-CSS) module for a working example.
+
+**Middleware Signature:**
+Your middleware will be passed these parameters:
+
 ```javascript
-email.send(options, callback);
-email.send(callback);
+function (email, css, options, next) { ... }
 ```
+
+* `email` - the email Ultimail will be sending.
+* `css` - The concatenated CSS of the layout template (if any) and the actual email template as a string.
+* `options` - The options passed to the Ultimail constructor or method.
+* `next` - callback.
+
+**Callback Signature:**
+You must always call the `next()` callback when you have finished, errors will be caught but it's a better practice to pass them to the callback. There is no need to pass the email back in the callback as this is handled automatically.
+
+```javascript
+return next(err);
+```
+
+**Updating the Email:**
+You can update the email by calling certain methods on it and passing in the output from your middleware:
+
+* To update the HTML body: `email.htmlBody(htmlBody)`.
+
+### Provider Handlers
+A provider handler needs to be configured for each mailer and will be responsible for sending emails via the provider's API.
+
+**Note:** Ultimail does NOT come with a pre-configured provider. You will need to configure one for your own use, for example the Postmark provider (see below).
+
+#### Configuring
+To configure a provider handler:
+
+```javascript
+const Ultimail = require(`ultimail`);
+const ultimailProviderPostmark = require(`ultimail-provider-postmark`);
+
+const mailer = new Ultimail({ ... });
+
+mailer.configure(`provider`, ultimailProviderPostmark({
+	apiKey: `my-postmark-server-api-key`,
+}));
+```
+
+#### Writing Your Own
+You can write your own provider middleware by following the conventions outlined below. See the source code of the [Ultimail-Provider-Postmark](https://github.com/saikojosh/Ultimail-Provider-Postmark) module for a working example.
+
+**Middleware Signature:**
+Your middleware will be passed these parameters:
+
+```javascript
+function (email, options, next) { ... }
+```
+
+* `email` - the email you will be sending.
+* `options` - The options passed to the Ultimail constructor or method.
+* `next` - callback.
+
+**Callback Signature:**
+You must always call the `next()` callback when you have finished, errors will be caught but it's a better practice to pass them to the callback. You can pass back some sort of result value as the second parameter for the user to consume, but bear in mind the only way to signify an unsuccessful send operation is to pass back or throw an error.
+
+```javascript
+return next(err[, result]);
+```
+
+**On Successful Send:**
+When the email sends successfully you should either pass `true` as the second parameter to the `next()` callback, or pass back the response from the provider's API directly. Ultimail assumes the email has sent successfully unless you pass back or throw an error.
+
+**On Failure:**
+When the email fails to send you should pass an error as the first parameter to the `next()` callback, or just throw an error. Ultimail assumes the email has sent successfully unless you pass back or throw an error.
+
+## API Overview
+
+### const mailer = new Ultimail([options]);
+Creates a new mailer instance of the Ultimail class with the given global options. The options specified here will apply for all emails sent using this mailer, but they can all be overridden when preparing or sending emails.
+
+| Option         | Default Value | Description |
+|----------------|---------------|-------------|
+| to             |               | An array of or comma-delimited string of default email addresses to send emails to via this mailer. |
+| cc             |               | An array of or comma-delimited string of default email addresses to carbon copy emails to via this mailer. |
+| bcc            |               | An array of or comma-delimited string of default email addresses to blind carbon copy emails to via this mailer. |
+| from           |               | The default from address to attach to emails sent via this mailer. |
+| replyTo        |               | The default reply-to address to attach to emails sent via this mailer. |
+| subject				 |               | The default subject for emails sent via this mailer. This string will be parsed by the templating handler. |
+| attachments    |               | A default array of attachments to include with emails sent via this mailer. See the section "Attachments" above for the object shape. |
+| variables      |               | A default hash of variables to use when parsing templates. |
+| layoutTemplate |               | The path to the directory that contains the default layout template for emails sent via this mailer. |
+| styles         | `true`        | Set to `false` to prevent CSS preparation by default on emails sent via this mailer. |
+
+### <promise> = mailer.prepare(template[, options[, callback]]);
+Returns a prepared Email object which can later be sent via `mailer.send()` or `email.send()`. Templates and CSS will be parsed and the appropriate options will be set on the email (see the constructor for the available options). If you specify the variables option the hash will be deep merged into the existing variables hash set on the constructor.
+
+**Note:** This method is automatically called when you use the `mailer.send()` or `mailer.sendTo()` methods.
+
+### <promise> = mailer.send(input[, options[, callback]]);
+Same as the `mailer.prepare()` method but also sends the email via the configured provider. The `input` parameter can either be an Email instance or a template directory.
+
+### <promise> = mailer.sendTo(to, input, [options[, callback]]);
+Same as the `mailer.prepare()` method but also sends the email via the configured provider, and overwrites the "to" option (see the constructor for the available options). The `input` parameter can either be an Email instance or a template directory.
+
+### <promise> = mailer.quickSend(options, htmlBody[, plainBody[, callback]]);
+Sends an email via the configured provider without parsing the HTML template or CSS. Instead, you pass the HTML and plain body of the email straight into this method.
+
+### mailer.isEmail(input);
+Returns true if the given input is an instance of the internal Email class created by Ultimail.
+
+### <promise> = email.send([options]);
+Sends a pre-prepared email. See the constructor for the available options.
