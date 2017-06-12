@@ -260,7 +260,7 @@ module.exports = class Ultimail extends MiddlewareEngine {
 		// If a subject was passed as an option that takes precedence.
 		if (options.subject) {
 			actualTemplate.subject = options.subject;
-			layoutTemplate.subject = options.subject;
+			if (layoutTemplate) { layoutTemplate.subject = options.subject; }
 		}
 
 		// Otherwise, attempt to ensure both templates have a subject from the the subject.txt files.
