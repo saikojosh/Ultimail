@@ -317,7 +317,7 @@ module.exports = class Ultimail extends MiddlewareEngine {
 			throw new Error(`Either a "htmlBody" or a "plainBody" needs to be specified.`);
 		}
 
-		if (this.isConfigured(`provider`)) {
+		if (!this.isConfigured(`provider`)) {
 			throw new Error(`You must configure a "provider" handler to send emails.`);
 		}
 
